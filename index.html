@@ -528,21 +528,21 @@ function addStudent() {
     </div>
     <div class="field">
       <label class="req" for="s-name-${idx}">Full name</label>
-      <input type="text" id="s-name-${idx}" class="s-name" ${idx === 1 ? "required" : ""}>
+      <input type="text" id="s-name-${idx}" name="s-name-${idx}" class="s-name" ${idx === 1 ? "required" : ""}>
     </div>
     <div class="row">
       <div class="field">
         <label class="req" for="s-class-${idx}">Classification</label>
-        <select id="s-class-${idx}" class="s-class" ${idx === 1 ? "required" : ""}>
+        <select id="s-class-${idx}" name="s-class-${idx}" class="s-class" ${idx === 1 ? "required" : ""}>
           <option value="">Choose…</option>${classOpts}
         </select>
       </div>
       <div class="field">
         <label for="s-major-other-${idx}">Major(s)</label>
         <div class="chips">${majorChips}</div>
-        <input type="text" id="s-major-other-${idx}" class="s-major-other" placeholder="Other major" style="margin-top:8px">
+        <input type="text" id="s-major-other-${idx}" name="s-major-other-${idx}" class="s-major-other" placeholder="Other major" style="margin-top:8px">
       </div>
-    </div>`;
+    </div>`;;
 
   studentsBox.appendChild(block);
 
