@@ -350,7 +350,7 @@
         <label class="req" for="url">Published URL</label>
         <input type="url" id="url" name="url" placeholder="https://" required>
         <div class="hint">Direct link to where the work was published.</div>
-        <div class="hint">Upload files here: <a href="https://app.shade.inc/publish/2f1062f6-3c78-47a7-9db1-0c868679beaf" target="_blank" rel="noreferrer noopener">Shade upload page</a></div>
+        <div class="hint">Create a new file with your name and upload files here: <a id="shadeUploadLink" href="https://app.shade.inc/publish/2f1062f6-3c78-47a7-9db1-0c868679beaf" target="_blank" rel="noreferrer noopener">Shade upload page</a></div>
       </div>
     </section>
 
@@ -542,7 +542,7 @@ function addStudent() {
         <div class="chips">${majorChips}</div>
         <input type="text" id="s-major-other-${idx}" name="s-major-other-${idx}" class="s-major-other" placeholder="Other major" style="margin-top:8px">
       </div>
-    </div>`;;
+    </div>`
 
   studentsBox.appendChild(block);
 
