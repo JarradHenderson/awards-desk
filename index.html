@@ -417,7 +417,7 @@ const CONFIG = {
     "Independent / Freelance"
   ],
 
-  majors: ["Journalism", "Digital Storytelling"],
+  majors: ["Journalism", "Digital Storytelling", "Other"],
   classifications: ["Freshman", "Sophomore", "Junior", "Senior"],
   statuses: ["Pending", "Submitted", "Winner", "Honorable Mention", "Rejected"]
 };
@@ -574,13 +574,15 @@ addStudent(); // start with one
 /* ---------- collect + submit ---------- */
 function collect() {
   const students = [...studentsBox.children].map(b => {
-    const majors = [...b.querySelectorAll('.chip[aria-pressed="true"]')].map(c => c.dataset.major);
+    const selectedMajors = [...b.querySelectorAll('.chip[aria-pressed="true"]')]
+      .map(c => c.dataset.major)
+      .filter(m => m !== "Other");
     const other = b.querySelector(".s-major-other").value.trim();
-    if (other) majors.push(other);
+    if (other) selectedMajors.push(other);
     return {
       name: b.querySelector(".s-name").value.trim(),
       classification: b.querySelector(".s-class").value,
-      majors
+      majors: selectedMajors
     };
   }).filter(s => s.name);
 
