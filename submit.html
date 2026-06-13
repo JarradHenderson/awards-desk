@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Submit an Entry — MSU Student Awards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     CONFIG — edit this block as competitions open.
+     Deadlines live here so the countdown works with no backend.
+     Mirror these from your Notion "Deadlines" database.
+     ============================================================ */
+
+  :root{
+    --ink:#14171A;
+    --paper:#FBFAF7;
+    --green:#18453B;       /* MSU institutional anchor */
+    --green-soft:#E7EEEA;
+    --hair:#DCD8CF;
+    --muted:#6B6E6A;
+    --safe:#2E7D55;        /* >14 days */
+    --warn:#C9701A;        /* 4-14 days */
+    --urgent:#B23A2E;      /* <=3 days / overdue */
+    --field:#FFFFFF;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    line-height:1.5;
+    font-size:16px;
+    padding:0 20px 80px;
+  }
+
+  .wrap{max-width:760px;margin:0 auto}
+
+  /* Masthead */
+  header{
+    border-bottom:2px solid var(--ink);
+    padding:34px 0 18px;
+    margin-bottom:0;
+  }
+  .eyebrow{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--green);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  h1{
+    font-family:'Archivo',sans-serif;
+    font-weight:800;
+    font-size:clamp(30px,6vw,46px);
+    line-height:1.02;
+    letter-spacing:-.02em;
+    margin-top:14px;
+  }
+  .sub{
+    color:var(--muted);
+    font-size:15px;
+    margin-top:12px;
+    max-width:52ch;
+  }
+
+  /* Deadline desk — the signature element */
+  .desk{
+    position:sticky;
+    top:0;
+    z-index:20;
+    background:var(--ink);
+    color:var(--paper);
+    border-radius:0 0 10px 10px;
+    padding:16px 20px;
+    margin-bottom:34px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+    flex-wrap:wrap;
+  }
+  .desk-label{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:#9AA39E;
+  }
+  .desk-deadline{
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    font-weight:600;
+    margin-top:3px;
+  }
+  .desk-count{
+    font-family:'Space Mono',monospace;
+    text-align:right;
+    line-height:1;
+  }
+  .desk-count .num{
+    font-size:40px;
+    font-weight:700;
+    display:block;
+  }
+  .desk-count .unit{
+    font-size:11px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:#9AA39E;
+  }
+  .desk[data-state="empty"] .desk-count .num{color:#5A5F5B}
+  .desk[data-state="safe"]   .desk-count .num{color:#6FD39B}
+  .desk[data-state="warn"]   .desk-count .num{color:#F0A24B}
+  .desk[data-state="urgent"] .desk-count .num{color:#FF7A6B}
+
+  /* Sections */
+  section{padding:28px 0;border-bottom:1px solid var(--hair)}
+  .sec-head{
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--green);
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+    margin-bottom:20px;
+  }
+  .sec-num{color:var(--muted)}
+
+  label{
+    display:block;
+    font-size:13px;
+    font-weight:600;
+    margin-bottom:7px;
+  }
+  .req::after{content:" *";color:var(--urgent)}
+  .hint{font-size:12px;color:var(--muted);font-weight:400;margin-top:5px}
+
+  input[type=text],input[type=url],input[type=date],select,textarea{
+    width:100%;
+    background:var(--field);
+    border:1px solid var(--hair);
+    border-radius:7px;
+    padding:11px 13px;
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    color:var(--ink);
+    transition:border-color .15s,box-shadow .15s;
+  }
+  input:focus,select:focus,textarea:focus{
+    outline:none;
+    border-color:var(--green);
+    box-shadow:0 0 0 3px var(--green-soft);
+  }
+  .field{margin-bottom:20px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:560px){.row{grid-template-columns:1fr}}
+
+  /* Multi-select majors as chips */
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{
+    font-size:13px;
+    font-weight:500;
+    border:1px solid var(--hair);
+    background:var(--field);
+    border-radius:20px;
+    padding:7px 14px;
+    cursor:pointer;
+    user-select:none;
+    transition:all .12s;
+  }
+  .chip[aria-pressed="true"]{
+    background:var(--green);
+    border-color:var(--green);
+    color:#fff;
+  }
+
+  /* Student blocks */
+  .student{
+    border:1px solid var(--hair);
+    border-radius:9px;
+    padding:18px;
+    margin-bottom:14px;
+    background:#fff;
+  }
+  .student-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:14px;
+  }
+  .student-tag{
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--green);
+  }
+  .remove{
+    background:none;
+    border:none;
+    color:var(--urgent);
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:'Space Mono',monospace;
+  }
+  .add-student{
+    background:none;
+    border:1px dashed var(--green);
+    color:var(--green);
+    border-radius:7px;
+    padding:11px;
+    width:100%;
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .add-student:disabled{opacity:.4;cursor:not-allowed}
+
+  /* Submit */
+  .actions{padding-top:30px}
+  .btn{
+    width:100%;
+    background:var(--green);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:16px;
+    font-family:'Archivo',sans-serif;
+    font-weight:700;
+    font-size:16px;
+    letter-spacing:.01em;
+    cursor:pointer;
+    transition:background .15s;
+  }
+  .btn:hover{background:#0F352C}
+  .btn:disabled{opacity:.5;cursor:wait}
+  .err{color:var(--urgent);font-size:13px;margin-top:12px;text-align:center;display:none}
+
+  /* Success screen */
+  .done{display:none;text-align:center;padding:60px 0}
+  .done.show{display:block}
+  .done .check{
+    width:64px;height:64px;border-radius:50%;
+    background:var(--green);color:#fff;
+    display:grid;place-items:center;margin:0 auto 22px;
+    font-size:30px;
+  }
+  .done h2{font-family:'Archivo';font-size:30px;font-weight:800;letter-spacing:-.02em}
+  .done p{color:var(--muted);margin:12px auto 30px;max-width:42ch}
+  .done .ghost{
+    background:none;border:1px solid var(--ink);color:var(--ink);
+    border-radius:8px;padding:13px 22px;font-weight:600;font-size:15px;
+    cursor:pointer;margin:6px;font-family:'Inter';
+  }
+  .done .ghost.primary{background:var(--ink);color:#fff}
+
+  .demo-flag{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--warn);
+    text-align:center;
+    padding:10px;
+    border:1px dashed var(--warn);
+    border-radius:6px;
+    margin-top:24px;
+    display:none;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">
+      <span>Michigan State University — School of Journalism</span>
+      <span id="yearTag">AY 2026–2027</span>
+    </div>
+    <h1>Awards Entry Desk</h1>
+    <p class="sub">Submit student work for Hearst, BEA, NPPA, and other competitions. Pick your competition and category to see exactly when your entry is due.</p>
+  </header>
+
+  <div class="desk" id="desk" data-state="empty">
+    <div>
+      <div class="desk-label">Deadline</div>
+      <div class="desk-deadline" id="deskDeadline">Select a competition and category</div>
+    </div>
+    <div class="desk-count">
+      <span class="num" id="deskNum">—</span>
+      <span class="unit" id="deskUnit">days until due</span>
+    </div>
+  </div>
+
+  <form id="form">
+
+    <!-- The work -->
+    <section>
+      <div class="sec-head"><span class="sec-num">01</span><span>The work</span></div>
+
+      <div class="field">
+        <label class="req" for="title">Project title</label>
+        <input type="text" id="title" name="title" required>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label class="req" for="competition">Competition</label>
+          <select id="competition" name="competition" required>
+            <option value="">Choose…</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="req" for="category">Category</label>
+          <select id="category" name="category" required disabled>
+            <option value="">Select a competition first</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label class="req" for="published">Date published</label>
+          <input type="date" id="published" name="published" required>
+        </div>
+        <div class="field">
+          <label class="req" for="course">Course or outlet</label>
+          <select id="course" name="course" required>
+            <option value="">Choose…</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="req" for="url">Published URL</label>
+        <input type="url" id="url" name="url" placeholder="https://" required>
+        <div class="hint">Direct link to where the work was published.</div>
+      </div>
+
+      <div class="field">
+        <label class="req" for="status">Status</label>
+        <select id="status" name="status" required></select>
+      </div>
+    </section>
+
+    <!-- Students -->
+    <section>
+      <div class="sec-head"><span class="sec-num">02</span><span>Students involved</span></div>
+      <div id="students"></div>
+      <button type="button" class="add-student" id="addStudent">+ Add another student</button>
+      <div class="hint" style="margin-top:8px">Add up to 6 students. The first listed is the primary contact.</div>
+    </section>
+
+    <div class="actions">
+      <button type="submit" class="btn" id="submitBtn">Submit entry</button>
+      <div class="err" id="err"></div>
+      <div class="demo-flag" id="demoFlag">Demo mode — no backend connected. Entry will not be saved yet.</div>
+    </div>
+  </form>
+
+  <!-- Success -->
+  <div class="done" id="done">
+    <div class="check">✓</div>
+    <h2>Entry received</h2>
+    <p id="doneMsg">Your submission is logged. Send yourself a copy for your records.</p>
+    <a class="ghost primary" id="emailCopy" href="#">Email myself a copy</a>
+    <button class="ghost" id="another">Submit another entry</button>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   CONFIG BLOCK — edit as competitions open.
+   competitions: each has categories mapped to ISO deadline dates.
+   These mirror your Notion "Deadlines" database. Update by hand
+   for now; v1.1 can pull these live from Notion via the proxy.
+   ============================================================ */
+const CONFIG = {
+  academicYear: "2026-2027",
+
+  // Placeholder Hearst categories + dates. Replace with the real
+  // monthly Hearst deadlines and your other competitions.
+  competitions: {
+    "Hearst": {
+      "Photography I: Stories & Picture Series": "2027-02-12",
+      "Photography II: News & Features": "2026-11-13",
+      "Multimedia I: Narrative / Storytelling": "2027-01-15",
+      "Multimedia II: News & Features": "2027-03-12"
+    },
+    "BEA": {
+      "Video Journalism": "2026-12-15",
+      "Audio / Podcasting": "2026-12-15"
+    },
+    "NPPA": {
+      "Student Photographer of the Year": "2027-01-26",
+      "Multimedia": "2027-01-26"
+    }
+  },
+
+  courses: [
+    "JRN 410: Advanced Photojournalism",
+    "JRN 492: Sports Photojournalism",
+    "WKAR",
+    "Impact 89FM",
+    "The State News",
+    "Independent / Freelance"
+  ],
+
+  majors: ["Journalism", "Digital Storytelling"],
+  classifications: ["Freshman", "Sophomore", "Junior", "Senior"],
+  statuses: ["Pending", "Submitted", "Winner", "Honorable Mention", "Rejected"]
+};
+
+/* ============================================================
+   BACKEND ENDPOINT
+   Leave blank for demo mode (no save, success screen still shows).
+   Set to your serverless proxy URL to write entries to Notion.
+   ============================================================ */
+const SUBMIT_ENDPOINT = "https://35dj580iha.execute-api.us-east-2.amazonaws.com/";
+
+/* ---------- build option lists ---------- */
+const $ = id => document.getElementById(id);
+
+$("yearTag").textContent = "AY " + CONFIG.academicYear.replace("-", "–");
+
+const compSel = $("competition");
+Object.keys(CONFIG.competitions).forEach(c => {
+  compSel.add(new Option(c, c));
+});
+
+const courseSel = $("course");
+CONFIG.courses.forEach(c => courseSel.add(new Option(c, c)));
+
+const statusSel = $("status");
+CONFIG.statuses.forEach(s => statusSel.add(new Option(s, s)));
+
+/* ---------- competition -> category dependency ---------- */
+const catSel = $("category");
+compSel.addEventListener("change", () => {
+  const comp = compSel.value;
+  catSel.innerHTML = "";
+  if (!comp) {
+    catSel.disabled = true;
+    catSel.add(new Option("Select a competition first", ""));
+    updateDesk();
+    return;
+  }
+  catSel.disabled = false;
+  catSel.add(new Option("Choose…", ""));
+  Object.keys(CONFIG.competitions[comp]).forEach(cat => {
+    catSel.add(new Option(cat, cat));
+  });
+  updateDesk();
+});
+catSel.addEventListener("change", updateDesk);
+
+/* ---------- live deadline desk ---------- */
+function deadlineFor(comp, cat) {
+  if (comp && cat && CONFIG.competitions[comp] && CONFIG.competitions[comp][cat]) {
+    return CONFIG.competitions[comp][cat];
+  }
+  return null;
+}
+function daysUntil(iso) {
+  const d = new Date(iso + "T23:59:59");
+  const now = new Date();
+  return Math.ceil((d - now) / 86400000);
+}
+function updateDesk() {
+  const desk = $("desk");
+  const iso = deadlineFor(compSel.value, catSel.value);
+  if (!iso) {
+    desk.dataset.state = "empty";
+    $("deskDeadline").textContent = "Select a competition and category";
+    $("deskNum").textContent = "—";
+    $("deskUnit").textContent = "days until due";
+    return;
+  }
+  const days = daysUntil(iso);
+  const dt = new Date(iso + "T12:00:00");
+  $("deskDeadline").textContent = dt.toLocaleDateString("en-US",
+    {weekday:"short", month:"long", day:"numeric", year:"numeric"});
+
+  if (days < 0) {
+    desk.dataset.state = "urgent";
+    $("deskNum").textContent = Math.abs(days);
+    $("deskUnit").textContent = "days overdue";
+  } else {
+    desk.dataset.state = days <= 3 ? "urgent" : days <= 14 ? "warn" : "safe";
+    $("deskNum").textContent = days;
+    $("deskUnit").textContent = days === 1 ? "day until due" : "days until due";
+  }
+}
+
+/* ---------- repeatable student blocks ---------- */
+const studentsBox = $("students");
+let studentCount = 0;
+const MAX_STUDENTS = 6;
+
+function addStudent() {
+  if (studentCount >= MAX_STUDENTS) return;
+  studentCount++;
+  const idx = studentCount;
+  const block = document.createElement("div");
+  block.className = "student";
+  block.dataset.idx = idx;
+
+  const majorChips = CONFIG.majors.map(m =>
+    `<button type="button" class="chip" aria-pressed="false" data-major="${m}">${m}</button>`
+  ).join("");
+
+  const classOpts = CONFIG.classifications.map(c =>
+    `<option value="${c}">${c}</option>`).join("");
+
+  block.innerHTML = `
+    <div class="student-top">
+      <span class="student-tag">Student ${idx}${idx === 1 ? " — primary" : ""}</span>
+      ${idx === 1 ? "" : '<button type="button" class="remove">Remove</button>'}
+    </div>
+    <div class="field">
+      <label class="req">Full name</label>
+      <input type="text" class="s-name" ${idx === 1 ? "required" : ""}>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label class="req">Classification</label>
+        <select class="s-class" ${idx === 1 ? "required" : ""}>
+          <option value="">Choose…</option>${classOpts}
+        </select>
+      </div>
+      <div class="field">
+        <label>Major(s)</label>
+        <div class="chips">${majorChips}</div>
+      </div>
+    </div>`;
+
+  studentsBox.appendChild(block);
+
+  block.querySelectorAll(".chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      const on = chip.getAttribute("aria-pressed") === "true";
+      chip.setAttribute("aria-pressed", on ? "false" : "true");
+    });
+  });
+  const rm = block.querySelector(".remove");
+  if (rm) rm.addEventListener("click", () => {
+    block.remove();
+    studentCount--;
+    renumber();
+    $("addStudent").disabled = false;
+  });
+
+  if (studentCount >= MAX_STUDENTS) $("addStudent").disabled = true;
+}
+function renumber() {
+  [...studentsBox.children].forEach((b, i) => {
+    const n = i + 1;
+    b.dataset.idx = n;
+    b.querySelector(".student-tag").textContent = "Student " + n + (n === 1 ? " — primary" : "");
+  });
+}
+$("addStudent").addEventListener("click", addStudent);
+addStudent(); // start with one
+
+/* ---------- collect + submit ---------- */
+function collect() {
+  const students = [...studentsBox.children].map(b => ({
+    name: b.querySelector(".s-name").value.trim(),
+    classification: b.querySelector(".s-class").value,
+    majors: [...b.querySelectorAll('.chip[aria-pressed="true"]')].map(c => c.dataset.major)
+  })).filter(s => s.name);
+
+  const iso = deadlineFor(compSel.value, catSel.value);
+  return {
+    academicYear: CONFIG.academicYear,
+    title: $("title").value.trim(),
+    competition: compSel.value,
+    category: catSel.value,
+    datePublished: $("published").value,
+    course: courseSel.value,
+    url: $("url").value.trim(),
+    status: statusSel.value,
+    deadline: iso,
+    daysUntilDue: iso ? daysUntil(iso) : null,
+    students,
+    submittedAt: new Date().toISOString()
+  };
+}
+
+function buildMailto(entry) {
+  const lines = [
+    "PROJECT: " + entry.title,
+    "Competition: " + entry.competition + " — " + entry.category,
+    "Deadline: " + (entry.deadline || "n/a") + "  (" + entry.daysUntilDue + " days)",
+    "Published: " + entry.datePublished + "  " + entry.url,
+    "Course/Outlet: " + entry.course,
+    "Status: " + entry.status,
+    "",
+    "STUDENTS:",
+    ...entry.students.map(s =>
+      "  • " + s.name + " — " + s.classification +
+      (s.majors.length ? " (" + s.majors.join(", ") + ")" : ""))
+  ];
+  const subject = "Awards entry: " + entry.title;
+  return "mailto:?subject=" + encodeURIComponent(subject) +
+         "&body=" + encodeURIComponent(lines.join("\n"));
+}
+
+const form = $("form");
+const err = $("err");
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  err.style.display = "none";
+
+  if (!catSel.value) {
+    err.textContent = "Choose a category before submitting.";
+    err.style.display = "block";
+    return;
+  }
+  const firstName = studentsBox.querySelector(".s-name").value.trim();
+  if (!firstName) {
+    err.textContent = "Add at least one student.";
+    err.style.display = "block";
+    return;
+  }
+
+  const entry = collect();
+  const btn = $("submitBtn");
+  btn.disabled = true;
+  btn.textContent = "Submitting…";
+
+  try {
+    if (SUBMIT_ENDPOINT) {
+      const res = await fetch(SUBMIT_ENDPOINT, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(entry)
+      });
+      if (!res.ok) throw new Error("Server responded " + res.status);
+    } else {
+      $("demoFlag").style.display = "block";
+      console.log("DEMO MODE — entry not saved:", entry);
+      await new Promise(r => setTimeout(r, 500));
+    }
+    $("emailCopy").href = buildMailto(entry);
+    form.style.display = "none";
+    $("desk").style.display = "none";
+    $("done").classList.add("show");
+    window.scrollTo({top:0, behavior:"smooth"});
+  } catch (ex) {
+    err.textContent = "Submission failed: " + ex.message + ". Try again or contact your instructor.";
+    err.style.display = "block";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Submit entry";
+  }
+});
+
+$("another").addEventListener("click", () => location.reload());
+</script>
+</body>
+</html>
