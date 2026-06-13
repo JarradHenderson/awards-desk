@@ -351,11 +351,6 @@
         <input type="url" id="url" name="url" placeholder="https://" required>
         <div class="hint">Direct link to where the work was published.</div>
       </div>
-
-      <div class="field">
-        <label class="req" for="status">Status</label>
-        <select id="status" name="status" required></select>
-      </div>
     </section>
 
     <!-- Students -->
@@ -446,9 +441,6 @@ Object.keys(CONFIG.competitions).forEach(c => {
 
 const courseSel = $("course");
 CONFIG.courses.forEach(c => courseSel.add(new Option(c, c)));
-
-const statusSel = $("status");
-CONFIG.statuses.forEach(s => statusSel.add(new Option(s, s)));
 
 /* ---------- competition -> category dependency ---------- */
 const catSel = $("category");
@@ -547,6 +539,7 @@ function addStudent() {
       <div class="field">
         <label>Major(s)</label>
         <div class="chips">${majorChips}</div>
+        <input type="text" class="s-major-other" placeholder="Other major" style="margin-top:8px">
       </div>
     </div>`;
 
@@ -580,11 +573,16 @@ addStudent(); // start with one
 
 /* ---------- collect + submit ---------- */
 function collect() {
-  const students = [...studentsBox.children].map(b => ({
-    name: b.querySelector(".s-name").value.trim(),
-    classification: b.querySelector(".s-class").value,
-    majors: [...b.querySelectorAll('.chip[aria-pressed="true"]')].map(c => c.dataset.major)
-  })).filter(s => s.name);
+  const students = [...studentsBox.children].map(b => {
+    const majors = [...b.querySelectorAll('.chip[aria-pressed="true"]')].map(c => c.dataset.major);
+    const other = b.querySelector(".s-major-other").value.trim();
+    if (other) majors.push(other);
+    return {
+      name: b.querySelector(".s-name").value.trim(),
+      classification: b.querySelector(".s-class").value,
+      majors
+    };
+  }).filter(s => s.name);
 
   const iso = deadlineFor(compSel.value, catSel.value);
   return {
@@ -595,7 +593,7 @@ function collect() {
     datePublished: $("published").value,
     course: courseSel.value,
     url: $("url").value.trim(),
-    status: statusSel.value,
+    status: "Pending",
     deadline: iso,
     daysUntilDue: iso ? daysUntil(iso) : null,
     students,
@@ -610,7 +608,6 @@ function buildMailto(entry) {
     "Deadline: " + (entry.deadline || "n/a") + "  (" + entry.daysUntilDue + " days)",
     "Published: " + entry.datePublished + "  " + entry.url,
     "Course/Outlet: " + entry.course,
-    "Status: " + entry.status,
     "",
     "STUDENTS:",
     ...entry.students.map(s =>
