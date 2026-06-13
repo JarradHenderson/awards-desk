@@ -527,20 +527,20 @@ function addStudent() {
       ${idx === 1 ? "" : '<button type="button" class="remove">Remove</button>'}
     </div>
     <div class="field">
-      <label class="req">Full name</label>
-      <input type="text" class="s-name" ${idx === 1 ? "required" : ""}>
+      <label class="req" for="s-name-${idx}">Full name</label>
+      <input type="text" id="s-name-${idx}" class="s-name" ${idx === 1 ? "required" : ""}>
     </div>
     <div class="row">
       <div class="field">
-        <label class="req">Classification</label>
-        <select class="s-class" ${idx === 1 ? "required" : ""}>
+        <label class="req" for="s-class-${idx}">Classification</label>
+        <select id="s-class-${idx}" class="s-class" ${idx === 1 ? "required" : ""}>
           <option value="">Choose…</option>${classOpts}
         </select>
       </div>
       <div class="field">
-        <label>Major(s)</label>
+        <label for="s-major-other-${idx}">Major(s)</label>
         <div class="chips">${majorChips}</div>
-        <input type="text" class="s-major-other" placeholder="Other major" style="margin-top:8px">
+        <input type="text" id="s-major-other-${idx}" class="s-major-other" placeholder="Other major" style="margin-top:8px">
       </div>
     </div>`;
 
