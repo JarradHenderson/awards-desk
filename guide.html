@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Awards Desk — Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14171A;
+    --paper:#FBFAF7;
+    --green:#18453B;
+    --green-soft:#E7EEEA;
+    --hair:#DCD8CF;
+    --muted:#6B6E6A;
+    --field:#FFFFFF;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    font-size:15px;
+    line-height:1.6;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:0 24px}
+
+  header{
+    border-bottom:2px solid var(--ink);
+    padding:40px 0 28px;
+  }
+  .eyebrow{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--green);
+    margin-bottom:6px;
+  }
+  h1{
+    font-family:'Archivo';
+    font-weight:800;
+    font-size:clamp(28px,5vw,42px);
+    letter-spacing:-.02em;
+    margin-bottom:12px;
+  }
+  .subtitle{
+    font-size:16px;
+    color:var(--muted);
+    line-height:1.5;
+  }
+
+  .access{
+    margin:32px 0;
+    padding:20px;
+    background:#fff;
+    border:1px solid var(--hair);
+    border-radius:8px;
+  }
+  .access-title{
+    font-family:'Space Mono',monospace;
+    font-size:10px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+  .access-link{
+    display:block;
+    margin:8px 0;
+    font-size:14px;
+  }
+  a{color:var(--green);text-decoration:none;border-bottom:1px solid var(--green)}
+  a:hover{opacity:.8}
+
+  /* Accordion */
+  .sections{margin:40px 0}
+  .section{
+    margin-bottom:0;
+    border-bottom:1px solid var(--hair);
+  }
+  .section-trigger{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    width:100%;
+    background:none;
+    border:none;
+    padding:18px 0;
+    cursor:pointer;
+    font-size:16px;
+    font-weight:600;
+    color:var(--ink);
+    font-family:'Inter';
+    text-align:left;
+  }
+  .section-trigger:hover{color:var(--green)}
+  .section-trigger::after{
+    content:'▼';
+    font-size:12px;
+    transform:rotate(0deg);
+    transition:transform .22s ease;
+    color:var(--green);
+  }
+  .section.open .section-trigger::after{
+    transform:rotate(180deg);
+  }
+  .section-content{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .22s ease;
+  }
+  .section.open .section-content{
+    max-height:4000px;
+  }
+  .section-body{
+    padding:0 0 24px;
+  }
+
+  h2{
+    font-family:'Archivo';
+    font-weight:700;
+    font-size:18px;
+    margin:20px 0 12px;
+    color:var(--ink);
+  }
+  h3{
+    font-family:'Archivo';
+    font-weight:600;
+    font-size:14px;
+    margin:16px 0 8px;
+    color:var(--ink);
+  }
+  p{
+    margin:12px 0;
+    color:var(--ink);
+    line-height:1.7;
+  }
+  ul{
+    margin:12px 0 12px 20px;
+  }
+  li{
+    margin:6px 0;
+    line-height:1.6;
+  }
+  strong{font-weight:600}
+  code{
+    font-family:'Space Mono',monospace;
+    font-size:13px;
+    color:var(--green);
+    background:var(--green-soft);
+    padding:2px 6px;
+    border-radius:3px;
+  }
+  .codeblock{
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    background:var(--green-soft);
+    padding:14px;
+    border-radius:6px;
+    margin:12px 0;
+    overflow-x:auto;
+    line-height:1.5;
+    border-left:3px solid var(--green);
+  }
+
+  /* Screenshots */
+  .screenshot{
+    margin:20px 0;
+    border-radius:8px;
+    overflow:hidden;
+    border:1px solid var(--hair);
+  }
+  .screenshot img{
+    width:100%;
+    display:block;
+  }
+  .screenshot-caption{
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    color:var(--muted);
+    padding:8px;
+    background:#fff;
+  }
+
+  .tip{
+    background:var(--green-soft);
+    border-left:3px solid var(--green);
+    padding:14px;
+    margin:16px 0;
+    border-radius:4px;
+  }
+  .tip strong{color:var(--green)}
+
+  footer{
+    border-top:2px solid var(--ink);
+    padding:40px 0;
+    margin-top:60px;
+    text-align:center;
+    color:var(--muted);
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">MSU School of Journalism</div>
+    <h1>Awards Desk</h1>
+    <p class="subtitle">A guide for faculty submitting student work and administrators managing entries.</p>
+  </header>
+
+  <div class="access">
+    <div class="access-title">Quick Links</div>
+    <div class="access-link"><strong>Submit an entry:</strong> <a href="https://jarradhenderson.github.io/awards-desk/">jarradhenderson.github.io/awards-desk/</a></div>
+    <div class="access-link"><strong>Manage entries (admin):</strong> <a href="https://jarradhenderson.github.io/awards-desk/admin.html">jarradhenderson.github.io/awards-desk/admin.html</a></div>
+  </div>
+
+  <div class="sections">
+
+    <!-- SECTION 1 -->
+    <div class="section">
+      <button class="section-trigger">For Faculty: Submitting Student Work</button>
+      <div class="section-content">
+        <div class="section-body">
+          <p>The Awards Entry Desk lets you submit student journalism work to competitions like Hearst, BEA, and NPPA. Each submission captures the project details, student information, and publication metadata.</p>
+
+          <h2>Getting Started</h2>
+          <p>Open <a href="https://jarradhenderson.github.io/awards-desk/">jarradhenderson.github.io/awards-desk/</a> in any modern web browser. You will see the submission form with a sticky deadline countdown bar at the top.</p>
+
+          <div class="screenshot">
+            <img src="screenshots/Screenshot_2026-06-13_at_11_37_40_PM.png" alt="Awards Entry Desk form">
+            <div class="screenshot-caption">The Awards Entry Desk submission form</div>
+          </div>
+
+          <h2>Step 1: Select Competition & Category</h2>
+          <p>Start by choosing which competition you are submitting to (Hearst, BEA, NPPA, etc.). Once you pick a competition, the Category dropdown populates with the available categories for that competition. The deadline for your selected category will display in the sticky bar at the top.</p>
+
+          <h2>Step 2: Enter Project Details</h2>
+          <p><strong>Project Title:</strong> The name of the work being submitted (e.g., "Flint Water Crisis: A Year Later").</p>
+          <p><strong>Date Published:</strong> When the work was originally published or broadcast (mm/dd/yyyy).</p>
+          <p><strong>Published URL:</strong> The live link where the work appears. For multimedia, paste the Embed or Share URL. For print or broadcast work, paste a link to where it lives online (your outlet's website, portfolio, etc.). A link is always required.</p>
+
+          <div class="tip">
+            <strong>Pro tip:</strong> Double-check that your Published URL is correct and starts with https://. The judges must be able to access it, or the entry may be disqualified.
+          </div>
+
+          <h2>Step 3: Select Course or Outlet</h2>
+          <p>Choose which course or news outlet the work was produced for (JRN 410, JRN 492, WKAR, The State News, etc.). Select "Independent / Freelance" if the work was not done for a course or outlet.</p>
+
+          <h2>Step 4: List Students Involved</h2>
+          <p>Add each student who worked on the project. The first student listed is marked as primary and will appear in the awards dashboard. For each student, you must enter their full name and classification (Freshman, Sophomore, Junior, Senior).</p>
+
+          <p><strong>Major selection:</strong> Check all majors that apply. If a student is undeclared or has a different major, select "Other" and type it in the text field. You can add up to 6 students per entry.</p>
+
+          <p>Click the green "+ Add another student" button to add more students.</p>
+
+          <h2>Step 5: Submit</h2>
+          <p>Review your entry and click the "Submit entry" button. A success screen appears with an option to email yourself a copy of the submission for your records. Your entry is now live in the awards management system.</p>
+
+          <h2>Tips & Best Practices</h2>
+          <ul>
+            <li><strong>Double-check your URL.</strong> The link must work and must be publicly accessible. If the judges cannot reach it, the entry may be disqualified.</li>
+            <li><strong>Get the student info right.</strong> Verify each student's name and classification before submitting. Mistakes here can affect the final awards record.</li>
+            <li><strong>Know your deadline.</strong> The countdown bar at the top shows when your competition category is due. Once the deadline passes, the form will no longer accept new entries for that category.</li>
+            <li><strong>Submit early.</strong> There is no advantage to waiting. Entries are recorded by submission time, not by quality or recency.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2 -->
+    <div class="section">
+      <button class="section-trigger">For Administrators: Managing the System</button>
+      <div class="section-content">
+        <div class="section-body">
+          <p>The Awards Control dashboard is a private interface for reviewing all submitted entries, updating their status, exporting data for judging, and managing competitions and deadlines.</p>
+
+          <h2>Accessing the Admin Dashboard</h2>
+          <p>Visit <a href="https://jarradhenderson.github.io/awards-desk/admin.html">jarradhenderson.github.io/awards-desk/admin.html</a> to open the dashboard. There is no password; the system assumes only authorized personnel have this link. Keep this URL private.</p>
+
+          <div class="screenshot">
+            <img src="screenshots/Screenshot_2026-06-13_at_11_37_58_PM.png" alt="Awards Control dashboard">
+            <div class="screenshot-caption">The Awards Control dashboard showing live entries</div>
+          </div>
+
+          <h2>Dashboard Layout</h2>
+          <p>The dashboard displays a live table of all submissions. Each row shows the project title, student names, competition and category, status badge (Pending, Submitted, Winner, Honorable Mention, Rejected), course/outlet, days until deadline, and publication date.</p>
+
+          <p>The counter in the top right shows how many entries match your current filters.</p>
+
+          <h2>Filtering Entries</h2>
+          <p>Use the four filter dropdowns at the top to narrow the table:</p>
+          <ul>
+            <li><strong>Competition:</strong> Show only Hearst, BEA, NPPA, etc.</li>
+            <li><strong>Category:</strong> Show only a specific category within a competition.</li>
+            <li><strong>Academic Year:</strong> Filter by 2024-2025, 2025-2026, etc.</li>
+            <li><strong>Course / Outlet:</strong> Show submissions from one course or outlet.</li>
+          </ul>
+
+          <p>You can stack filters. For example, filter to "Hearst" competition + "Photography I" category + "2026-2027" year to see only that specific cohort.</p>
+
+          <h2>Year Tabs</h2>
+          <p>At the bottom of the screen, year tabs let you quickly switch between academic years. Click a year tab to filter the entire dashboard to that year. The "All years" tab shows entries across all years.</p>
+
+          <h2>Editing Entries</h2>
+          <p>Click any row in the table to open an edit panel on the right. You can update any field:</p>
+
+          <div class="screenshot">
+            <img src="screenshots/Screenshot_2026-06-13_at_11_38_22_PM.png" alt="Edit entry drawer">
+            <div class="screenshot-caption">The edit drawer for updating entry details</div>
+          </div>
+
+          <ul>
+            <li><strong>Status:</strong> Change from Pending to Submitted, Winner, Honorable Mention, or Rejected. Useful for tracking entries through the judging process.</li>
+            <li><strong>Project Title, Competition, Category, Course:</strong> Fix typos or correct submission mistakes.</li>
+            <li><strong>Dates & URLs:</strong> Update publication dates and links if the original link breaks or is updated.</li>
+            <li><strong>Student Info:</strong> Correct name, classification, and major if the student info was wrong on submission.</li>
+          </ul>
+
+          <p>Read-only fields like "Days Until Due" and "Submitted On" cannot be edited. Click "Save changes" to write updates to the system. Click "Cancel" to discard changes and close the drawer.</p>
+
+          <h2>Exporting Data</h2>
+          <p>Click the "Export CSV" button to download the entries currently visible on screen as a CSV file. This respects your active filters and year tab. For example, if you are viewing only Hearst Photography I entries from 2026-2027, only those entries will be in the CSV.</p>
+
+          <p>Use this CSV to send entry lists to judges, create competition rosters, or analyze entry trends.</p>
+
+          <h2>Refreshing Data</h2>
+          <p>Click the "Refresh" button to reload entries from the live system. New submissions appear automatically, but refresh if you want to see the latest entries without reloading the page.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3 -->
+    <div class="section">
+      <button class="section-trigger">Competition & Deadline Configuration</button>
+      <div class="section-content">
+        <div class="section-body">
+          <p>To add or update competitions, categories, and deadlines, you must edit the form's configuration directly in the GitHub repository.</p>
+
+          <h2>Accessing the Configuration</h2>
+          <ol>
+            <li>Go to <a href="https://github.com/JarradHenderson/awards-desk">github.com/JarradHenderson/awards-desk</a></li>
+            <li>Click the file <strong>index.html</strong></li>
+            <li>Click the pencil (edit) icon in the top right</li>
+            <li>Search for the line that says <strong>CONFIG</strong> (it is near the top of the script section, around line 140)</li>
+          </ol>
+
+          <h2>Adding a New Competition</h2>
+          <p>Inside the <strong>competitions</strong> object, add a new entry in this format:</p>
+          <div class="codeblock">competitions: {<br>
+&nbsp;&nbsp;"Hearst": { ... },<br>
+&nbsp;&nbsp;"NewCompetition": {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"Category 1": "2027-03-15",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"Category 2": "2027-04-01"<br>
+&nbsp;&nbsp;}<br>
+}</div>
+
+          <p>The date format is YYYY-MM-DD. Make sure the JSON is valid (commas between entries, no trailing commas).</p>
+
+          <h2>Adding Courses or Outlets</h2>
+          <p>Find the <strong>courses</strong> array and add new courses as strings:</p>
+          <div class="codeblock">courses: [<br>
+&nbsp;&nbsp;"JRN 410: Advanced Photojournalism",<br>
+&nbsp;&nbsp;"JRN 492: Sports Photojournalism",<br>
+&nbsp;&nbsp;"My New Course",<br>
+&nbsp;&nbsp;"Another Outlet"<br>
+]</div>
+
+          <h2>Saving Changes</h2>
+          <p>After editing the CONFIG block, scroll to the bottom of the edit area, add a short commit message (e.g., "Add AEJMC competition"), and click "Commit changes". The form will update within 1-2 minutes. Hard-refresh the form page (Cmd+Shift+R) to see the new options.</p>
+
+          <div class="tip">
+            <strong>Tip:</strong> Keep your CONFIG block organized with consistent formatting. It makes future edits easier and reduces the chance of introducing syntax errors.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4 -->
+    <div class="section">
+      <button class="section-trigger">Troubleshooting</button>
+      <div class="section-content">
+        <div class="section-body">
+
+          <h2>Submission Failed: "Failed to fetch"</h2>
+          <p><strong>Cause:</strong> Network error or server unreachable.</p>
+          <p><strong>Fix:</strong> Check your internet connection. Make sure the Published URL is complete and starts with https://. Try again in a few seconds. If the problem persists, contact Jarrad.</p>
+
+          <h2>The form is slow or does not load</h2>
+          <p><strong>Cause:</strong> Browser cache or slow network.</p>
+          <p><strong>Fix:</strong> Hard-refresh the page (Cmd+Shift+R on Mac, Ctrl+Shift+R on Windows). Try a different browser or device. Clear your browser cache.</p>
+
+          <h2>I entered a student but can't add more</h2>
+          <p><strong>Cause:</strong> You have reached the maximum of 6 students.</p>
+          <p><strong>Fix:</strong> The form allows up to 6 students per entry. If you need to add more, create a second entry for the additional students.</p>
+
+          <h2>The admin dashboard shows no entries</h2>
+          <p><strong>Cause:</strong> Either no entries have been submitted yet, or all entries are filtered out.</p>
+          <p><strong>Fix:</strong> Click "Refresh" to reload from the live system. Check that your filters are set to "All". Click the "All years" tab at the bottom. If there are truly no entries, wait for submissions to come in.</p>
+
+          <h2>I cannot find an entry I just submitted</h2>
+          <p><strong>Cause:</strong> The dashboard has not refreshed yet, or the entry did not save.</p>
+          <p><strong>Fix:</strong> Click "Refresh" in the dashboard. If the entry still does not appear, ask the faculty member to check their submission confirmation email. If they received a confirmation, the entry was saved and will appear after a refresh.</p>
+
+          <h2>An edited entry did not save</h2>
+          <p><strong>Cause:</strong> Network error during the save.</p>
+          <p><strong>Fix:</strong> Try editing the entry again. If a message appears saying "Save failed", wait a few seconds and try again. If the problem persists, refresh the page and re-open the entry to see if your changes were saved.</p>
+
+          <h2>CSV export is empty or incomplete</h2>
+          <p><strong>Cause:</strong> Your filters are too restrictive, or you have no entries matching the filters.</p>
+          <p><strong>Fix:</strong> Check your active filters at the top and your year tab at the bottom. Make sure you are not accidentally filtering out all entries. Click "All" on each filter to reset them.</p>
+
+          <h2>Need More Help?</h2>
+          <p>For questions or issues not covered here, contact Jarrad Henderson at the MSU School of Journalism.</p>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>Awards Desk — MSU School of Journalism</p>
+    <p style="margin-top:8px;font-size:11px">Last updated June 2026</p>
+  </footer>
+</div>
+
+<script>
+document.querySelectorAll('.section-trigger').forEach(trigger => {
+  trigger.addEventListener('click', () => {
+    const section = trigger.parentElement;
+    section.classList.toggle('open');
+  });
+});
+</script>
+</body>
+</html>
