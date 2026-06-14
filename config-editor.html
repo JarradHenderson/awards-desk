@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Awards Desk — Config Editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14171A;
+    --paper:#FBFAF7;
+    --green:#18453B;
+    --green-soft:#E7EEEA;
+    --hair:#DCD8CF;
+    --muted:#6B6E6A;
+    --field:#FFFFFF;
+    --warn:#C9701A;
+    --error:#B23A2E;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    font-size:15px;
+    line-height:1.6;
+    padding-bottom:60px;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+
+  header{
+    border-bottom:2px solid var(--ink);
+    padding:40px 0 28px;
+  }
+  .eyebrow{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--green);
+    margin-bottom:6px;
+  }
+  h1{
+    font-family:'Archivo';
+    font-weight:800;
+    font-size:clamp(28px,5vw,42px);
+    letter-spacing:-.02em;
+    margin-bottom:12px;
+  }
+
+  .intro{
+    background:var(--green-soft);
+    border-left:3px solid var(--green);
+    padding:16px;
+    margin:24px 0;
+    border-radius:4px;
+  }
+  .intro p{font-size:14px;line-height:1.6}
+
+  .tabs{
+    display:flex;
+    gap:0;
+    margin:32px 0 0;
+    border-bottom:2px solid var(--ink);
+  }
+  .tab-btn{
+    background:none;
+    border:none;
+    padding:16px 24px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    color:var(--muted);
+    border-bottom:3px solid transparent;
+    margin-bottom:-2px;
+    font-family:'Inter';
+  }
+  .tab-btn.active{
+    color:var(--ink);
+    border-bottom-color:var(--green);
+  }
+  .tab-btn:hover{color:var(--ink)}
+
+  .tab-content{display:none}
+  .tab-content.active{display:block}
+
+  h2{
+    font-family:'Archivo';
+    font-weight:700;
+    font-size:18px;
+    margin:24px 0 16px;
+    color:var(--ink);
+  }
+  h3{
+    font-family:'Archivo';
+    font-weight:600;
+    font-size:14px;
+    margin:16px 0 10px;
+    color:var(--ink);
+  }
+
+  .card{
+    background:#fff;
+    border:1px solid var(--hair);
+    border-radius:8px;
+    padding:16px;
+    margin:12px 0;
+  }
+  .card-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:12px;
+  }
+  .card-title{
+    font-weight:600;
+    font-size:15px;
+  }
+  .card-action{
+    background:none;
+    border:1px solid var(--hair);
+    color:var(--muted);
+    padding:6px 12px;
+    border-radius:4px;
+    cursor:pointer;
+    font-size:13px;
+    font-family:'Inter';
+  }
+  .card-action:hover{
+    border-color:var(--ink);
+    color:var(--ink);
+  }
+  .card-action.delete{color:var(--error);border-color:var(--error)}
+  .card-action.delete:hover{background:var(--error);color:#fff}
+
+  .form-group{
+    margin:12px 0;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .form-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  label{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  input,select,textarea{
+    background:var(--field);
+    border:1px solid var(--hair);
+    border-radius:6px;
+    padding:9px 11px;
+    font-family:'Inter';
+    font-size:14px;
+    color:var(--ink);
+  }
+  input:focus,select:focus,textarea:focus{
+    outline:none;
+    border-color:var(--green);
+    box-shadow:0 0 0 3px var(--green-soft);
+  }
+
+  .btn{
+    background:var(--green);
+    color:#fff;
+    border:none;
+    border-radius:6px;
+    padding:10px 16px;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+    font-family:'Inter';
+  }
+  .btn:hover{opacity:.9}
+  .btn.secondary{
+    background:none;
+    border:1px solid var(--ink);
+    color:var(--ink);
+  }
+  .btn.secondary:hover{background:var(--ink);color:#fff}
+
+  .output-section{
+    margin:24px 0;
+  }
+  .code-output{
+    background:var(--green-soft);
+    border:1px solid var(--green);
+    border-radius:6px;
+    padding:14px;
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    overflow-x:auto;
+    max-height:400px;
+    overflow-y:auto;
+    line-height:1.5;
+    white-space:pre-wrap;
+    word-break:break-all;
+  }
+  .copy-btn{
+    margin-top:12px;
+  }
+
+  .msg{
+    padding:12px;
+    border-radius:4px;
+    margin:12px 0;
+    font-size:13px;
+  }
+  .msg.success{
+    background:#E8F5E9;
+    border:1px solid #4CAF50;
+    color:#2E7D32;
+  }
+  .msg.error{
+    background:#FFEBEE;
+    border:1px solid var(--error);
+    color:var(--error);
+  }
+  .msg.info{
+    background:var(--green-soft);
+    border:1px solid var(--green);
+    color:var(--green);
+  }
+
+  .category-list{
+    margin-left:20px;
+    padding:12px;
+    background:#fafafa;
+    border-radius:4px;
+    margin-top:8px;
+  }
+  .category-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:8px;
+    margin:4px 0;
+    background:#fff;
+    border:1px solid var(--hair);
+    border-radius:3px;
+    font-size:13px;
+  }
+  .category-name{flex:1}
+  .category-deadline{
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    color:var(--muted);
+    margin-right:12px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">MSU School of Journalism — Admin Tool</div>
+    <h1>Config Editor</h1>
+  </header>
+
+  <div class="intro">
+    <p>Manage competitions, categories, deadlines, and courses without editing GitHub. Build your config visually, then copy the generated code into <code>index.html</code>.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="competitions">Competitions</button>
+    <button class="tab-btn" data-tab="courses">Courses & Outlets</button>
+    <button class="tab-btn" data-tab="output">Generate Code</button>
+  </div>
+
+  <!-- COMPETITIONS TAB -->
+  <div id="competitions" class="tab-content active">
+    <h2>Add Competitions & Categories</h2>
+    <p style="margin-bottom:16px">Each competition has multiple categories with their own deadlines. Add them below.</p>
+
+    <div id="competitionsContainer"></div>
+
+    <button class="btn" id="addCompBtn" style="margin-top:16px">+ Add Competition</button>
+  </div>
+
+  <!-- COURSES TAB -->
+  <div id="courses" class="tab-content">
+    <h2>Courses & Outlets</h2>
+    <p style="margin-bottom:16px">List all courses and outlets where work can be created.</p>
+
+    <div id="coursesContainer"></div>
+
+    <button class="btn" id="addCourseBtn" style="margin-top:16px">+ Add Course / Outlet</button>
+  </div>
+
+  <!-- OUTPUT TAB -->
+  <div id="output" class="tab-content">
+    <h2>Generated CONFIG Code</h2>
+    <p style="margin-bottom:16px">Copy this code and paste it into <code>index.html</code> in the CONFIG section (around line 140).</p>
+
+    <div class="code-output" id="codeOutput">// Code will appear here</div>
+    <button class="btn copy-btn" id="copyBtn">Copy to Clipboard</button>
+
+    <div id="copyMsg"></div>
+
+    <h3 style="margin-top:32px">How to Paste Into GitHub</h3>
+    <ol style="margin-left:20px;line-height:1.8">
+      <li>Go to <a href="https://github.com/JarradHenderson/awards-desk" target="_blank">github.com/JarradHenderson/awards-desk</a></li>
+      <li>Open <strong>index.html</strong> and click the pencil (edit) icon</li>
+      <li>Find the <strong>CONFIG = {</strong> line (around line 140)</li>
+      <li>Replace the entire CONFIG block with the code above</li>
+      <li>Scroll down, add a commit message (e.g., "Update competitions and deadlines")</li>
+      <li>Click "Commit changes"</li>
+      <li>Wait 1-2 minutes for GitHub Pages to rebuild</li>
+      <li>Hard-refresh the form (Cmd+Shift+R) to see updates</li>
+    </ol>
+  </div>
+</div>
+
+<script>
+const state = {
+  competitions: {},
+  courses: []
+};
+
+// Load from localStorage
+function load() {
+  const saved = localStorage.getItem('awardsConfig');
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      state.competitions = data.competitions || {};
+      state.courses = data.courses || [];
+    } catch (e) {
+      console.error('Failed to load saved config', e);
+    }
+  }
+  render();
+}
+
+// Save to localStorage
+function save() {
+  localStorage.setItem('awardsConfig', JSON.stringify(state));
+}
+
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(tab).classList.add('active');
+    if (tab === 'output') generateOutput();
+  });
+});
+
+// Render competitions
+function renderCompetitions() {
+  const container = document.getElementById('competitionsContainer');
+  container.innerHTML = '';
+  
+  Object.keys(state.competitions).forEach((compName, idx) => {
+    const comp = state.competitions[compName];
+    const card = document.createElement('div');
+    card.className = 'card';
+    
+    let catHTML = '<div class="category-list">';
+    Object.keys(comp).forEach((catName, catIdx) => {
+      catHTML += `
+        <div class="category-item">
+          <span class="category-name">${esc(catName)}</span>
+          <span class="category-deadline">${comp[catName]}</span>
+          <button class="card-action delete" onclick="deleteCategory('${esc(compName)}', '${esc(catName)}')">Delete</button>
+        </div>
+      `;
+    });
+    catHTML += '</div>';
+    
+    card.innerHTML = `
+      <div class="card-header">
+        <span class="card-title">${esc(compName)}</span>
+        <button class="card-action delete" onclick="deleteCompetition('${esc(compName)}')">Delete</button>
+      </div>
+      <button class="btn secondary" style="margin-bottom:12px;width:100%;text-align:left" onclick="toggleAddCategory('${esc(compName)}')">+ Add Category</button>
+      <div id="addCat-${idx}" style="display:none;background:#fafafa;padding:12px;border-radius:4px;margin-bottom:12px">
+        <div class="form-group">
+          <label>Category Name</label>
+          <input type="text" id="catName-${idx}" placeholder="e.g., Photography I: Stories">
+        </div>
+        <div class="form-group">
+          <label>Deadline (YYYY-MM-DD)</label>
+          <input type="date" id="catDate-${idx}">
+        </div>
+        <button class="btn" onclick="addCategory('${esc(compName)}', ${idx})" style="width:100%">Add Category</button>
+      </div>
+      ${catHTML}
+    `;
+    container.appendChild(card);
+  });
+}
+
+function renderCourses() {
+  const container = document.getElementById('coursesContainer');
+  container.innerHTML = '';
+  
+  state.courses.forEach((course, idx) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-header">
+        <span class="card-title">${esc(course)}</span>
+        <button class="card-action delete" onclick="deleteCourse(${idx})">Delete</button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+  
+  const addForm = document.createElement('div');
+  addForm.className = 'card';
+  addForm.innerHTML = `
+    <div class="form-group">
+      <label>New Course / Outlet</label>
+      <input type="text" id="newCourse" placeholder="e.g., JRN 410: Advanced Photojournalism">
+    </div>
+    <button class="btn" onclick="addCourse()" style="width:100%">Add</button>
+  `;
+  container.appendChild(addForm);
+}
+
+function render() {
+  renderCompetitions();
+  renderCourses();
+}
+
+function toggleAddCategory(compName) {
+  const idx = Object.keys(state.competitions).indexOf(compName);
+  const div = document.getElementById(`addCat-${idx}`);
+  if (div) div.style.display = div.style.display === 'none' ? 'block' : 'none';
+}
+
+function addCompetition() {
+  const name = prompt('Competition name (e.g., Hearst, BEA, NPPA):');
+  if (name && !state.competitions[name]) {
+    state.competitions[name] = {};
+    save();
+    render();
+  }
+}
+
+function deleteCompetition(name) {
+  if (confirm(`Delete "${name}" and all its categories?`)) {
+    delete state.competitions[name];
+    save();
+    render();
+  }
+}
+
+function addCategory(compName, idx) {
+  const catName = document.getElementById(`catName-${idx}`).value.trim();
+  const catDate = document.getElementById(`catDate-${idx}`).value;
+  if (catName && catDate) {
+    state.competitions[compName][catName] = catDate;
+    save();
+    render();
+  }
+}
+
+function deleteCategory(compName, catName) {
+  if (confirm(`Delete "${catName}"?`)) {
+    delete state.competitions[compName][catName];
+    save();
+    render();
+  }
+}
+
+function addCourse() {
+  const input = document.getElementById('newCourse');
+  const course = input.value.trim();
+  if (course && !state.courses.includes(course)) {
+    state.courses.push(course);
+    state.courses.sort();
+    save();
+    render();
+    input.value = '';
+  }
+}
+
+function deleteCourse(idx) {
+  if (confirm(`Delete "${state.courses[idx]}"?`)) {
+    state.courses.splice(idx, 1);
+    save();
+    render();
+  }
+}
+
+function generateOutput() {
+  let code = 'const CONFIG = {\n';
+  code += '  competitions: {\n';
+  
+  Object.keys(state.competitions).forEach((compName, idx) => {
+    const isLast = idx === Object.keys(state.competitions).length - 1;
+    code += `    "${compName}": {\n`;
+    const comp = state.competitions[compName];
+    Object.keys(comp).forEach((catName, catIdx) => {
+      const isLastCat = catIdx === Object.keys(comp).length - 1;
+      code += `      "${catName}": "${comp[catName]}"${isLastCat ? '' : ','}\n`;
+    });
+    code += `    }${isLast ? '' : ','}\n`;
+  });
+  
+  code += '  },\n';
+  code += '  courses: [\n';
+  state.courses.forEach((course, idx) => {
+    const isLast = idx === state.courses.length - 1;
+    code += `    "${course}"${isLast ? '' : ','}\n`;
+  });
+  code += '  ],\n';
+  code += '  majors: ["Journalism", "Digital Storytelling", "Other"]\n';
+  code += '};\n';
+  
+  document.getElementById('codeOutput').textContent = code;
+}
+
+document.getElementById('addCompBtn').addEventListener('click', addCompetition);
+document.getElementById('copyBtn').addEventListener('click', () => {
+  const code = document.getElementById('codeOutput').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    const msg = document.getElementById('copyMsg');
+    msg.className = 'msg success';
+    msg.textContent = 'Copied to clipboard!';
+    setTimeout(() => msg.textContent = '', 2000);
+  });
+});
+
+function esc(s) {
+  return String(s).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+load();
+</script>
+</body>
+</html>
