@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Awards Desk — Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14171A;
+    --paper:#FBFAF7;
+    --green:#18453B;
+    --green-soft:#E7EEEA;
+    --hair:#DCD8CF;
+    --muted:#6B6E6A;
+    --field:#FFFFFF;
+    --pending:#8A8D88;
+    --submitted:#2F6DB5;
+    --winner:#2E7D55;
+    --honorable:#C9701A;
+    --rejected:#B23A2E;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    font-size:15px;
+    padding:0 0 70px;
+  }
+  .wrap{max-width:1280px;margin:0 auto;padding:0 24px}
+
+  header{
+    border-bottom:2px solid var(--ink);
+    padding:28px 0 16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:14px;
+  }
+  .eyebrow{
+    font-family:'Space Mono',monospace;
+    font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--green);
+  }
+  h1{font-family:'Archivo';font-weight:800;font-size:clamp(26px,4vw,38px);letter-spacing:-.02em;margin-top:8px}
+  .count{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted)}
+
+  .toolbar{
+    display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;
+    padding:18px 0;border-bottom:1px solid var(--hair);
+  }
+  .filter{display:flex;flex-direction:column;gap:5px}
+  .filter label{
+    font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--muted);
+  }
+  select,input[type=text],input[type=url],input[type=date]{
+    background:var(--field);border:1px solid var(--hair);border-radius:6px;
+    padding:8px 10px;font-family:'Inter';font-size:14px;color:var(--ink);
+  }
+  select:focus,input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .spacer{flex:1}
+  .btn{
+    background:var(--green);color:#fff;border:none;border-radius:6px;
+    padding:9px 16px;font-weight:600;font-size:14px;cursor:pointer;font-family:'Inter';
+  }
+  .btn.ghost{background:none;border:1px solid var(--ink);color:var(--ink)}
+  .btn:hover{opacity:.9}
+
+  .state{padding:60px 0;text-align:center;color:var(--muted);font-family:'Space Mono',monospace;font-size:13px}
+
+  table{width:100%;border-collapse:collapse;margin-top:6px}
+  thead th{
+    font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--muted);text-align:left;
+    padding:12px 10px;border-bottom:1px solid var(--hair);white-space:nowrap;
+  }
+  tbody td{padding:13px 10px;border-bottom:1px solid var(--hair);vertical-align:top}
+  tbody tr{cursor:pointer}
+  tbody tr:hover{background:#fff}
+  .t-title{font-weight:600}
+  .t-sub{font-size:12px;color:var(--muted);margin-top:2px}
+  .mono{font-family:'Space Mono',monospace;font-size:13px}
+
+  .badge{
+    display:inline-block;font-family:'Space Mono',monospace;font-size:11px;
+    letter-spacing:.04em;padding:3px 9px;border-radius:20px;color:#fff;white-space:nowrap;
+  }
+  .b-Pending{background:var(--pending)}
+  .b-Submitted{background:var(--submitted)}
+  .b-Winner{background:var(--winner)}
+  .b-Honorable{background:var(--honorable)}
+  .b-Rejected{background:var(--rejected)}
+
+  .due{font-family:'Space Mono',monospace;font-size:13px;font-weight:700}
+  .due.safe{color:var(--winner)}
+  .due.warn{color:var(--honorable)}
+  .due.urgent{color:var(--rejected)}
+  .due.none{color:var(--muted);font-weight:400}
+
+  /* Year tabs at the bottom */
+  .yeartabs{
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--ink);
+    display:flex;gap:4px;justify-content:center;align-items:center;
+    padding:10px 16px;z-index:30;flex-wrap:wrap;
+  }
+  .ytab{
+    font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.06em;
+    color:#9AA39E;background:none;border:none;padding:7px 16px;border-radius:6px;cursor:pointer;
+  }
+  .ytab[aria-selected="true"]{background:var(--green);color:#fff}
+
+  /* Edit drawer */
+  .scrim{
+    position:fixed;inset:0;background:rgba(20,23,26,.4);display:none;z-index:40;
+  }
+  .scrim.open{display:block}
+  .drawer{
+    position:fixed;top:0;right:0;bottom:0;width:min(480px,100%);
+    background:var(--paper);z-index:50;transform:translateX(100%);
+    transition:transform .22s ease;overflow-y:auto;padding:26px 26px 40px;
+    box-shadow:-8px 0 30px rgba(0,0,0,.12);
+  }
+  .drawer.open{transform:translateX(0)}
+  .drawer h2{font-family:'Archivo';font-size:22px;font-weight:800;margin-bottom:4px;padding-right:30px}
+  .drawer .close{position:absolute;top:22px;right:22px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted)}
+  .d-field{margin:16px 0}
+  .d-field label{
+    display:block;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:6px;
+  }
+  .d-field input,.d-field select,.d-field textarea{width:100%}
+  .d-field textarea{
+    background:var(--field);border:1px solid var(--hair);border-radius:6px;padding:9px 11px;
+    font-family:'Inter';font-size:14px;min-height:70px;resize:vertical;
+  }
+  .d-readonly{font-family:'Space Mono',monospace;font-size:13px;color:var(--muted)}
+  .d-actions{display:flex;gap:10px;margin-top:24px}
+  .d-msg{font-size:13px;margin-top:12px;min-height:18px}
+  .d-msg.err{color:var(--rejected)}
+  .d-msg.ok{color:var(--winner)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">MSU School of Journalism — Admin</div>
+      <h1>Awards Control</h1>
+    </div>
+    <div class="count" id="count">Loading…</div>
+  </header>
+
+  <div class="toolbar">
+    <div class="filter">
+      <label for="fComp">Competition</label>
+      <select id="fComp"><option value="">All</option></select>
+    </div>
+    <div class="filter">
+      <label for="fCat">Category</label>
+      <select id="fCat"><option value="">All</option></select>
+    </div>
+    <div class="filter">
+      <label for="fYear">Academic Year</label>
+      <select id="fYear"><option value="">All</option></select>
+    </div>
+    <div class="filter">
+      <label for="fCourse">Course / Outlet</label>
+      <select id="fCourse"><option value="">All</option></select>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn ghost" id="refresh">Refresh</button>
+    <button class="btn" id="export">Export CSV</button>
+  </div>
+
+  <div id="state" class="state">Loading entries…</div>
+
+  <table id="table" style="display:none">
+    <thead>
+      <tr>
+        <th>Project</th>
+        <th>Competition / Category</th>
+        <th>Status</th>
+        <th>Course</th>
+        <th>Due</th>
+        <th>Published</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+</div>
+
+<div class="yeartabs" id="yeartabs"></div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer">
+  <button class="close" id="dClose">&times;</button>
+  <div class="eyebrow" style="margin-bottom:6px">Edit entry</div>
+  <h2 id="dHeading">—</h2>
+
+  <div class="d-field"><label>Project title</label><input type="text" id="dTitle"></div>
+  <div class="d-field"><label>Competition</label><input type="text" id="dComp"></div>
+  <div class="d-field"><label>Category</label><input type="text" id="dCat"></div>
+  <div class="d-field"><label>Status</label>
+    <select id="dStatus"></select>
+  </div>
+  <div class="d-field"><label>Course / Outlet</label><input type="text" id="dCourse"></div>
+  <div class="d-field"><label>Academic Year</label><input type="text" id="dYear"></div>
+  <div class="d-field"><label>Deadline</label><input type="date" id="dDeadline"></div>
+  <div class="d-field"><label>Days until due</label><div class="d-readonly" id="dDue">—</div></div>
+  <div class="d-field"><label>Date published</label><input type="date" id="dPub"></div>
+  <div class="d-field"><label>Published URL</label><input type="url" id="dUrl"></div>
+  <div class="d-field"><label>Primary name</label><input type="text" id="dPName"></div>
+  <div class="d-field"><label>Primary classification</label><input type="text" id="dPClass"></div>
+  <div class="d-field"><label>Majors (comma separated)</label><input type="text" id="dMajors"></div>
+  <div class="d-field"><label>Students roster</label><textarea id="dStudents"></textarea></div>
+  <div class="d-field"><label>Submitted on</label><div class="d-readonly" id="dSubmitted">—</div></div>
+
+  <div class="d-actions">
+    <button class="btn" id="dSave">Save changes</button>
+    <button class="btn ghost" id="dCancel">Cancel</button>
+  </div>
+  <div class="d-msg" id="dMsg"></div>
+</aside>
+
+<script>
+const API_ENDPOINT = "https://q6kb9h3lcf.execute-api.us-east-2.amazonaws.com";
+const STATUSES = ["Pending","Submitted","Winner","Honorable Mention","Rejected"];
+
+const $ = id => document.getElementById(id);
+let ALL = [];        // every entry
+let activeYear = ""; // "" = all years
+let editingId = null;
+
+async function api(payload){
+  const res = await fetch(API_ENDPOINT, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if(!res.ok || data.error) throw new Error(data.error || ("Server " + res.status));
+  return data;
+}
+
+function badgeClass(status){
+  if(status === "Honorable Mention") return "b-Honorable";
+  return "b-" + (status || "Pending").replace(/\s+/g,"");
+}
+function dueCell(days){
+  if(days === null || days === undefined) return '<span class="due none">—</span>';
+  const cls = days < 0 ? "urgent" : days <= 3 ? "urgent" : days <= 14 ? "warn" : "safe";
+  const label = days < 0 ? Math.abs(days)+"d over" : days+"d";
+  return `<span class="due ${cls}">${label}</span>`;
+}
+
+function distinct(key){
+  return [...new Set(ALL.map(e => e[key]).filter(Boolean))].sort();
+}
+function fillSelect(sel, values, keep){
+  const cur = keep ? sel.value : "";
+  sel.innerHTML = '<option value="">All</option>';
+  values.forEach(v => sel.add(new Option(v, v)));
+  sel.value = cur;
+}
+
+function buildFilters(){
+  fillSelect($("fComp"), distinct("competition"), true);
+  fillSelect($("fCat"), distinct("category"), true);
+  fillSelect($("fYear"), distinct("academicYear"), true);
+  fillSelect($("fCourse"), distinct("course"), true);
+}
+
+function buildYearTabs(){
+  const years = distinct("academicYear");
+  const box = $("yeartabs");
+  box.innerHTML = "";
+  const addTab = (label, val) => {
+    const b = document.createElement("button");
+    b.className = "ytab";
+    b.textContent = label;
+    b.setAttribute("aria-selected", activeYear === val ? "true" : "false");
+    b.addEventListener("click", () => { activeYear = val; render(); });
+    box.appendChild(b);
+  };
+  addTab("All years", "");
+  years.forEach(y => addTab(y, y));
+}
+
+function visibleRows(){
+  const comp = $("fComp").value, cat = $("fCat").value,
+        yr = $("fYear").value, course = $("fCourse").value;
+  return ALL.filter(e =>
+    (!activeYear || e.academicYear === activeYear) &&
+    (!comp || e.competition === comp) &&
+    (!cat || e.category === cat) &&
+    (!yr || e.academicYear === yr) &&
+    (!course || e.course === course)
+  );
+}
+
+function render(){
+  buildYearTabs();
+  const rows = visibleRows();
+  const tbody = $("rows");
+  tbody.innerHTML = "";
+
+  if(rows.length === 0){
+    $("table").style.display = "none";
+    $("state").style.display = "block";
+    $("state").textContent = ALL.length ? "No entries match these filters." : "No entries yet.";
+  } else {
+    $("state").style.display = "none";
+    $("table").style.display = "table";
+    rows.forEach(e => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>
+          <div class="t-title">${esc(e.title) || "Untitled"}</div>
+          <div class="t-sub">${esc(e.students) || ""}</div>
+        </td>
+        <td>${esc(e.competition)||"—"}<div class="t-sub">${esc(e.category)||""}</div></td>
+        <td><span class="badge ${badgeClass(e.status)}">${esc(e.status)||"Pending"}</span></td>
+        <td class="mono">${esc(e.course)||"—"}</td>
+        <td>${dueCell(e.daysUntilDue)}</td>
+        <td class="mono">${esc(e.datePublished)||"—"}</td>`;
+      tr.addEventListener("click", () => openDrawer(e.id));
+      tbody.appendChild(tr);
+    });
+  }
+  $("count").textContent = rows.length + " of " + ALL.length + " shown";
+}
+
+function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+/* ---------- load ---------- */
+async function load(){
+  $("state").style.display = "block";
+  $("state").textContent = "Loading entries…";
+  $("table").style.display = "none";
+  try{
+    const data = await api({ action:"list" });
+    ALL = data.entries || [];
+    buildFilters();
+    render();
+  }catch(err){
+    $("state").textContent = "Could not load entries: " + err.message;
+  }
+}
+
+/* ---------- edit drawer ---------- */
+function openDrawer(id){
+  const e = ALL.find(x => x.id === id);
+  if(!e) return;
+  editingId = id;
+  $("dHeading").textContent = e.title || "Untitled";
+  $("dTitle").value = e.title || "";
+  $("dComp").value = e.competition || "";
+  $("dCat").value = e.category || "";
+  $("dStatus").innerHTML = "";
+  STATUSES.forEach(s => $("dStatus").add(new Option(s, s)));
+  $("dStatus").value = e.status || "Pending";
+  $("dCourse").value = e.course || "";
+  $("dYear").value = e.academicYear || "";
+  $("dDeadline").value = e.deadline || "";
+  $("dDue").textContent = (e.daysUntilDue==null) ? "—" : e.daysUntilDue + " days";
+  $("dPub").value = e.datePublished || "";
+  $("dUrl").value = e.url || "";
+  $("dPName").value = e.primaryName || "";
+  $("dPClass").value = e.primaryClass || "";
+  $("dMajors").value = (e.majors || []).join(", ");
+  $("dStudents").value = e.students || "";
+  $("dSubmitted").textContent = e.submittedOn ? new Date(e.submittedOn).toLocaleString() : "—";
+  $("dMsg").textContent = "";
+  $("scrim").classList.add("open");
+  $("drawer").classList.add("open");
+}
+function closeDrawer(){
+  $("scrim").classList.remove("open");
+  $("drawer").classList.remove("open");
+  editingId = null;
+}
+
+async function saveEdit(){
+  if(!editingId) return;
+  const fields = {
+    title: $("dTitle").value.trim(),
+    competition: $("dComp").value.trim(),
+    category: $("dCat").value.trim(),
+    status: $("dStatus").value,
+    course: $("dCourse").value.trim(),
+    academicYear: $("dYear").value.trim(),
+    deadline: $("dDeadline").value,
+    datePublished: $("dPub").value,
+    url: $("dUrl").value.trim(),
+    primaryName: $("dPName").value.trim(),
+    primaryClass: $("dPClass").value.trim(),
+    majors: $("dMajors").value.split(",").map(s=>s.trim()).filter(Boolean),
+    students: $("dStudents").value.trim()
+  };
+  const msg = $("dMsg");
+  msg.className = "d-msg";
+  msg.textContent = "Saving…";
+  $("dSave").disabled = true;
+  try{
+    const data = await api({ action:"update", id: editingId, fields });
+    // merge updated entry into ALL
+    const idx = ALL.findIndex(x => x.id === editingId);
+    if(idx >= 0 && data.entry) ALL[idx] = data.entry;
+    buildFilters();
+    render();
+    msg.className = "d-msg ok";
+    msg.textContent = "Saved.";
+    setTimeout(closeDrawer, 500);
+  }catch(err){
+    msg.className = "d-msg err";
+    msg.textContent = "Save failed: " + err.message;
+  }finally{
+    $("dSave").disabled = false;
+  }
+}
+
+/* ---------- CSV export ---------- */
+function exportCSV(){
+  const rows = visibleRows();
+  const cols = ["title","students","competition","category","status","course",
+                "academicYear","deadline","daysUntilDue","datePublished","url",
+                "primaryName","primaryClass","majors"];
+  const head = ["Project Title","Students","Competition","Category","Status","Course",
+                "Academic Year","Deadline","Days Until Due","Date Published","URL",
+                "Primary Name","Primary Classification","Majors"];
+  const escCSV = v => {
+    if(Array.isArray(v)) v = v.join("; ");
+    v = (v==null?"":String(v));
+    return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v;
+  };
+  const lines = [head.join(",")];
+  rows.forEach(e => lines.push(cols.map(c => escCSV(e[c])).join(",")));
+  const blob = new Blob([lines.join("\n")], {type:"text/csv"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "awards-entries-" + new Date().toISOString().slice(0,10) + ".csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ---------- wiring ---------- */
+["fComp","fCat","fYear","fCourse"].forEach(id => $(id).addEventListener("change", render));
+$("refresh").addEventListener("click", load);
+$("export").addEventListener("click", exportCSV);
+$("dClose").addEventListener("click", closeDrawer);
+$("dCancel").addEventListener("click", closeDrawer);
+$("scrim").addEventListener("click", closeDrawer);
+$("dSave").addEventListener("click", saveEdit);
+
+load();
+</script>
+</body>
+</html>
