@@ -231,7 +231,6 @@
           <h2>Getting Started</h2>
           <p>Open <a href="https://jarradhenderson.github.io/awards-desk/">jarradhenderson.github.io/awards-desk/</a> in any modern web browser. You will see the submission form with a sticky deadline countdown bar at the top.</p>
 
-      
           <h2>Step 1: Select Competition & Category</h2>
           <p>Start by choosing which competition you are submitting to (Hearst, BEA, NPPA, etc.). Once you pick a competition, the Category dropdown populates with the available categories for that competition. The deadline for your selected category will display in the sticky bar at the top.</p>
 
@@ -278,7 +277,6 @@
           <h2>Accessing the Admin Dashboard</h2>
           <p>Visit <a href="https://jarradhenderson.github.io/awards-desk/admin.html">jarradhenderson.github.io/awards-desk/admin.html</a> to open the dashboard. There is no password; the system assumes only authorized personnel have this link. Keep this URL private.</p>
 
-
           <h2>Dashboard Layout</h2>
           <p>The dashboard displays a live table of all submissions. Each row shows the project title, student names, competition and category, status badge (Pending, Submitted, Winner, Honorable Mention, Rejected), course/outlet, days until deadline, and publication date.</p>
 
@@ -301,7 +299,6 @@
           <h2>Editing Entries</h2>
           <p>Click any row in the table to open an edit panel on the right. You can update any field:</p>
 
-    
           <ul>
             <li><strong>Status:</strong> Change from Pending to Submitted, Winner, Honorable Mention, or Rejected. Useful for tracking entries through the judging process.</li>
             <li><strong>Project Title, Competition, Category, Course:</strong> Fix typos or correct submission mistakes.</li>
@@ -489,8 +486,7 @@ function renderEditorCompetitions() {
       catHTML += `
         <div style="display:flex;justify-content:space-between;align-items:center;padding:6px;background:#fff;border:1px solid var(--hair);border-radius:3px;margin:4px 0;font-size:12px">
           <span>${esc(catName)}</span>
-          <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);margin-right:8px">${comp[catName]}</span>
-          <button style="background:none;border:1px solid #B23A2E;color:#B23A2E;padding:3px 8px;border-radius:3px;cursor:pointer;font-size:11px;font-family:'Inter'" onclick="deleteEditorCategory('${esc(compName)}', '${esc(catName)}')">Delete</button>
+          <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)">${comp[catName]}</span>
         </div>
       `;
     });
@@ -501,7 +497,6 @@ function renderEditorCompetitions() {
     card.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <div style="font-weight:600;font-size:14px">${esc(compName)}</div>
-        <button style="background:none;border:1px solid #B23A2E;color:#B23A2E;padding:5px 10px;border-radius:4px;cursor:pointer;font-size:12px;font-family:'Inter'" onclick="deleteEditorCompetition('${esc(compName)}')">Delete</button>
       </div>
       <button style="background:none;border:1px solid var(--ink);color:var(--ink);padding:8px 12px;border-radius:4px;cursor:pointer;font-size:12px;font-family:'Inter';width:100%;text-align:left;margin-bottom:10px" onclick="toggleEditorAddCat('${esc(compName)}', ${idx})">+ Add Category</button>
       <div id="addCat-${idx}" style="display:none;background:#fafafa;padding:10px;border-radius:4px;margin-bottom:10px">
@@ -557,11 +552,99 @@ function toggleEditorAddCat(compName, idx) {
 }
 
 function addEditorCompetition() {
-  const name = prompt('Competition name (e.g., Hearst, BEA, NPPA):');
-  if (name && !editorState.competitions[name]) {
-    editorState.competitions[name] = {};
-    saveEditor();
-    renderEditor();
+  const compName = prompt('Competition name (e.g., Hearst, BEA, NPPA):');
+  if (!compName || editorState.competitions[compName]) return;
+  
+  // Create a temporary competition object for this session
+  const tempCategories = [];
+  
+  // Show modal
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(20,23,26,.6);display:flex;align-items:center;justify-content:center;z-index:100';
+  modal.innerHTML = `
+    <div style="background:var(--paper);border-radius:8px;padding:24px;max-width:400px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,.2)">
+      <h2 style="font-family:'Archivo';font-weight:800;font-size:20px;margin-bottom:16px">${esc(compName)}</h2>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Add categories and deadlines for this competition.</p>
+      
+      <div id="tempCategoriesContainer" style="margin-bottom:16px"></div>
+      
+      <div style="background:#fff;border:1px solid var(--hair);border-radius:6px;padding:12px;margin-bottom:16px">
+        <div style="margin:8px 0">
+          <label style="display:block;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Category Name</label>
+          <input type="text" id="tempCatName" placeholder="e.g., Photography I: Stories" style="width:100%;padding:8px;border:1px solid var(--hair);border-radius:4px;font-family:'Inter';font-size:13px">
+        </div>
+        <div style="margin:8px 0">
+          <label style="display:block;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Deadline (YYYY-MM-DD)</label>
+          <input type="date" id="tempCatDate" style="width:100%;padding:8px;border:1px solid var(--hair);border-radius:4px;font-family:'Inter';font-size:13px">
+        </div>
+        <button style="background:var(--green);color:#fff;border:none;padding:8px 12px;border-radius:4px;cursor:pointer;font-size:12px;font-family:'Inter';width:100%;margin-top:8px" onclick="addTempCategory('${esc(compName)}')">Add Category</button>
+      </div>
+      
+      <div style="display:flex;gap:10px">
+        <button style="background:var(--green);color:#fff;border:none;padding:10px 16px;border-radius:4px;cursor:pointer;font-size:13px;font-family:'Inter';flex:1;font-weight:600" onclick="saveTempCompetition('${esc(compName)}')">Save Competition</button>
+        <button style="background:none;border:1px solid var(--ink);color:var(--ink);padding:10px 16px;border-radius:4px;cursor:pointer;font-size:13px;font-family:'Inter';flex:1" onclick="closeTempModal()">Cancel</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  window.tempCompName = compName;
+  window.tempCategories = tempCategories;
+  window.tempModal = modal;
+  renderTempCategories();
+}
+
+function addTempCategory(compName) {
+  const catName = document.getElementById('tempCatName').value.trim();
+  const catDate = document.getElementById('tempCatDate').value;
+  if (catName && catDate) {
+    window.tempCategories.push({ name: catName, date: catDate });
+    document.getElementById('tempCatName').value = '';
+    document.getElementById('tempCatDate').value = '';
+    renderTempCategories();
+  }
+}
+
+function renderTempCategories() {
+  const container = document.getElementById('tempCategoriesContainer');
+  if (!container) return;
+  container.innerHTML = '';
+  if (window.tempCategories.length === 0) {
+    container.innerHTML = '<p style="font-size:12px;color:var(--muted);text-align:center;padding:12px">No categories added yet</p>';
+    return;
+  }
+  window.tempCategories.forEach((cat, idx) => {
+    const item = document.createElement('div');
+    item.style.cssText = 'background:#fff;border:1px solid var(--hair);border-radius:4px;padding:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;font-size:12px';
+    item.innerHTML = `
+      <div>
+        <div style="font-weight:600">${esc(cat.name)}</div>
+        <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)">${cat.date}</div>
+      </div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+function saveTempCompetition(compName) {
+  if (window.tempCategories.length === 0) {
+    alert('Add at least one category before saving.');
+    return;
+  }
+  editorState.competitions[compName] = {};
+  window.tempCategories.forEach(cat => {
+    editorState.competitions[compName][cat.name] = cat.date;
+  });
+  saveEditor();
+  renderEditor();
+  closeTempModal();
+}
+
+function closeTempModal() {
+  if (window.tempModal) {
+    window.tempModal.remove();
+    window.tempModal = null;
+    window.tempCompName = null;
+    window.tempCategories = null;
   }
 }
 
