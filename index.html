@@ -330,6 +330,7 @@
           <select id="category" name="category" required disabled>
             <option value="">Select a competition first</option>
           </select>
+          <div class="hint" id="categoryNote" style="display:none"></div>
         </div>
       </div>
 
@@ -390,22 +391,108 @@
 const CONFIG = {
   academicYear: "2026-2027",
 
-  // Placeholder Hearst categories + dates. Replace with the real
-  // monthly Hearst deadlines and your other competitions.
+  // Each category is { deadline: "YYYY-MM-DD", description: "…" }.
+  // A plain "YYYY-MM-DD" string still works and simply shows no description.
+  // Hearst dates from the official 2026-2027 calendar (hearstawards.org).
+  // BEA date from the BEA Festival of Media Arts student rules.
   competitions: {
     "Hearst": {
-      "Photography I: Stories & Picture Series": "2027-02-12",
-      "Photography II: News & Features": "2026-11-13",
-      "Multimedia I: Narrative / Storytelling": "2027-01-15",
-      "Multimedia II: News & Features": "2027-03-12"
+      "Photojournalism I: News and Features": {
+        deadline: "2026-11-10",
+        description: "Four to eight images, including at least two news and two features. News covers breaking news, general news, and news photos from sporting events. Features covers features, portraits, sports, and documentary work. Judged on photographic quality, visual storytelling, versatility, consistency, human interest, news value, originality, editing, writing, and reporting."
+      },
+      "Photojournalism II: Picture Story/Series": {
+        deadline: "2027-02-09",
+        description: "One picture story or series of up to fifteen still images on any subject. You may optionally add a video of up to 60 seconds containing the submitted images; nat sound or dialog is allowed but not required. At least one image must have been disseminated in print or online. Judged on photographic quality, visual storytelling, versatility, consistency, human interest, news value, originality, editing, writing, and reporting."
+      },
+      "Multimedia I: Narrative Video Storytelling": {
+        deadline: "2026-11-17",
+        description: "One video per entrant, a story on any topic told through video for a digital audience. Defined as a single piece of journalism executed essentially by one journalist. No dramatization, and it must have been published on the web. Judges weigh uniqueness of presentation, use of digital storytelling techniques, and the impact and strength of the journalism. Must have been produced and posted between September 1, 2025 and November 17, 2026."
+      },
+      "Multimedia II: Innovative Journalism": {
+        deadline: "2027-01-26",
+        description: "One project per entrant using immersive digital tools such as virtual, augmented or mixed reality, 360 video, AI, data visualization or animation. Include a short statement explaining how the entry fits the category, the innovation attempted, the tools or techniques used, and how well the project reached and engaged its target community. Defined as a single piece of journalism executed essentially by one journalist. No dramatization, and it must have been published on the web. Must have been produced and posted between September 1, 2025 and January 26, 2027."
+      },
+      "Multimedia III: Enterprise Story (Individual)": {
+        deadline: "2027-03-02",
+        description: "One project per entrant: individual reporting on a single news event, or enterprise or explanatory journalism around a newsworthy event or issue. Each entry needs at least three components that together tell the story, drawn from writing, photographs, audio, video, graphics, data, emerging media and social media. Defined as a single piece of journalism executed essentially by one journalist. No dramatization, and it must have been published on the web. Must have been produced and posted between September 1, 2025 and March 2, 2027."
+      },
+      "Multimedia IV: Enterprise Story (Team)": {
+        deadline: "2027-04-13",
+        description: "Team reporting on a single news event, or enterprise or explanatory journalism around a newsworthy event or issue. Each entry needs at least three components that together tell the story, drawn from writing, photographs, audio, video, graphics, data, emerging media and social media. No dramatization, and it must have been published on the web. Entrants must be undergraduates, and awards are shared among the undergraduates on the winning team. Must have been produced and posted between September 1, 2025 and April 13, 2027. No championship round."
+      },
+      "Television I: Features": {
+        deadline: "2026-11-17",
+        description: "At least two reports totaling no more than ten minutes. Non-deadline reporting on personalities, events or issues, including public affairs, business, investigations, science, sports or weather. Reports may come from a longer newscast, but the entry is capped at ten minutes. Multimedia versions may accompany the entry if the entrant produced them. Must have aired or been posted between September 1, 2025 and November 17, 2026. The first-place winner or championship qualifier here cannot also compete in Television II."
+      },
+      "Television II: News": {
+        deadline: "2027-03-23",
+        description: "At least two reports totaling no more than ten minutes, with a hard news focus regardless of subject. Breaking or developing news on campus, community, national or international issues, sports, business, investigative, science or weather. Reports may come from a longer newscast, but the entry is capped at ten minutes. Multimedia versions may accompany the entry if the entrant produced them. Must have aired or been posted between September 1, 2025 and March 23, 2027."
+      },
+      "Audio: News and/or Features": {
+        deadline: "2027-01-19",
+        description: "At least two reports in news and/or features, originating with and produced by the entrant, seven minutes total. Breaking or developing news, or non-deadline reporting on personalities, events or issues, including public affairs, business, investigations, science, sports or weather. An excerpt may be entered if the reports are part of a longer newscast. Must have aired or been posted between September 1, 2025 and January 19, 2027. Each university may submit two entries, by different students."
+      },
+      "Podcast: News and/or Features (Team or Individual)": {
+        deadline: "2027-04-06",
+        description: "One podcast episode per entry, ten minutes judged. Fact-based, audio-driven stories on timely issues with clear public interest. Mark the ten-minute segment you want judged, or the first ten minutes are used. The podcast must be publicly accessible on a podcast platform; include the link, a full episode list, and a 2-3 sentence description of the show. Audio with video is allowed but only audio is judged. Entrants must be undergraduates. Must have been disseminated between September 1, 2025 and April 6, 2027. Each university may submit up to two entries, each by a different student or team. No championship round."
+      },
+      "Feature Writing": {
+        deadline: "2026-11-03",
+        description: "Creative feature writing: a color or mood article covering news, business, feature or entertainment, rather than a hard news story or personality profile. Stories should be memorable for their reporting, crafting, creativity and economy of expression. Sidebars subordinate in length and content may be included. Must have been published in print or online between September 1, 2025 and November 3, 2026."
+      },
+      "Sports Writing": {
+        deadline: "2026-12-15",
+        description: "A news story, feature or commentary in sports, relating to an event or issue rather than to a sports personality. Sidebars subordinate in length and content may be included. Must have been published in print or online between September 1, 2025 and December 15, 2026."
+      },
+      "Personality/Profile Writing": {
+        deadline: "2027-02-02",
+        description: "A personality sketch of an individual on or off campus. Must have been published in print or online between September 1, 2025 and February 2, 2027."
+      },
+      "Investigative Reporting (Team or Individual)": {
+        deadline: "2027-03-09",
+        description: "Substantive enterprise reporting on issues of public importance, focused on stories someone may have tried to keep from public scrutiny. Entries should show strong use of investigative elements such as data, AI, documents, analysis, experts and storytelling, and explain any actual or potential impact. Required: a brief description of the reporting process, including how access to essential information was achieved, any use of AI, and any special challenges. Entrants must be undergraduates. Each university may submit up to two entries, each by a different student or team. For teams, the administering professor selects one lead entrant for the championship, and team points do not count toward at-large selection. Must have been published between September 1, 2025 and March 9, 2027."
+      }
     },
     "BEA": {
-      "Video Journalism": "2026-12-15",
-      "Audio / Podcasting": "2026-12-15"
+      "Audio": {
+        deadline: "2026-12-16",
+        description: "BEA Festival of Media Arts student audio competition. Entries close at 3:00 pm ET."
+      },
+      "Documentary": {
+        deadline: "2026-12-16",
+        description: "Student documentary work. Entries close at 3:00 pm ET."
+      },
+      "Film & Video": {
+        deadline: "2026-12-16",
+        description: "Narrative and non-narrative student film and video. Entries close at 3:00 pm ET."
+      },
+      "Interactive Multimedia & Emerging Technologies": {
+        deadline: "2026-12-16",
+        description: "Interactive, immersive and emerging-format projects. Entries close at 3:00 pm ET."
+      },
+      "News": {
+        deadline: "2026-12-16",
+        description: "Student news packages and newscasts. Entries close at 3:00 pm ET."
+      },
+      "Scriptwriting": {
+        deadline: "2026-12-16",
+        description: "Original scripts. Entries close at 3:00 pm ET."
+      },
+      "Sports": {
+        deadline: "2026-12-16",
+        description: "Sports production and reporting. Entries close at 3:00 pm ET."
+      }
     },
     "NPPA": {
-      "Student Photographer of the Year": "2027-01-26",
-      "Multimedia": "2027-01-26"
+      "Student Photographer of the Year": {
+        deadline: "2027-01-26",
+        description: "Portfolio competition for student photojournalists. DEADLINE UNVERIFIED. Confirm at competitions.nppa.org before relying on this date."
+      },
+      "Student Quarterly Clip Contest": {
+        deadline: "2027-01-26",
+        description: "Quarterly contest for student clips. DEADLINE UNVERIFIED. Confirm at competitions.nppa.org before relying on this date."
+      }
     }
   },
 
@@ -464,11 +551,28 @@ compSel.addEventListener("change", () => {
 catSel.addEventListener("change", updateDesk);
 
 /* ---------- live deadline desk ---------- */
+/* A category is either "YYYY-MM-DD" or { deadline, description }. */
+function categoryEntry(comp, cat) {
+  if (!comp || !cat) return null;
+  const comps = CONFIG.competitions[comp];
+  if (!comps || !comps[cat]) return null;
+  const v = comps[cat];
+  return typeof v === "string" ? { deadline: v, description: "" } : v;
+}
 function deadlineFor(comp, cat) {
-  if (comp && cat && CONFIG.competitions[comp] && CONFIG.competitions[comp][cat]) {
-    return CONFIG.competitions[comp][cat];
-  }
-  return null;
+  const e = categoryEntry(comp, cat);
+  return e && e.deadline ? e.deadline : null;
+}
+function descriptionFor(comp, cat) {
+  const e = categoryEntry(comp, cat);
+  return e && e.description ? e.description : "";
+}
+function updateCategoryNote() {
+  const note = $("categoryNote");
+  if (!note) return;
+  const text = descriptionFor(compSel.value, catSel.value);
+  note.textContent = text;
+  note.style.display = text ? "block" : "none";
 }
 function daysUntil(iso) {
   const d = new Date(iso + "T23:59:59");
@@ -477,6 +581,7 @@ function daysUntil(iso) {
 }
 function updateDesk() {
   const desk = $("desk");
+  updateCategoryNote();
   const iso = deadlineFor(compSel.value, catSel.value);
   if (!iso) {
     desk.dataset.state = "empty";
