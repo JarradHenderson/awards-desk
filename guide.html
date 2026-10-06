@@ -483,10 +483,16 @@ function renderEditorCompetitions() {
     const comp = editorState.competitions[compName];
     let catHTML = '<div style="margin-left:16px;margin-top:8px;padding:8px;background:#fafafa;border-radius:4px">';
     Object.keys(comp).forEach((catName) => {
+      const e = catEntry(comp[catName]);
       catHTML += `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px;background:#fff;border:1px solid var(--hair);border-radius:3px;margin:4px 0;font-size:12px">
-          <span>${esc(catName)}</span>
-          <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)">${comp[catName]}</span>
+        <div style="padding:6px;background:#fff;border:1px solid var(--hair);border-radius:3px;margin:4px 0;font-size:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span>${esc(catName)}</span>
+            <span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)">${esc(e.deadline)}</span>
+          </div>
+          ${e.description
+            ? `<div style="font-size:11px;color:var(--muted);margin-top:4px">${esc(e.description)}</div>`
+            : `<div style="font-size:11px;color:#C9701A;margin-top:4px">No description</div>`}
         </div>
       `;
     });
@@ -507,6 +513,10 @@ function renderEditorCompetitions() {
         <div style="margin:8px 0">
           <label style="display:block;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Deadline (YYYY-MM-DD)</label>
           <input type="date" id="catDate-${idx}" style="width:100%;padding:8px;border:1px solid var(--hair);border-radius:4px;font-family:'Inter';font-size:13px">
+        </div>
+        <div style="margin:8px 0">
+          <label style="display:block;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Description (optional)</label>
+          <textarea id="catDesc-${idx}" rows="3" placeholder="What the entry consists of, limits, eligibility window, team rules." style="width:100%;padding:8px;border:1px solid var(--hair);border-radius:4px;font-family:'Inter';font-size:13px;resize:vertical"></textarea>
         </div>
         <button style="background:var(--green);color:#fff;border:none;padding:8px 12px;border-radius:4px;cursor:pointer;font-size:12px;font-family:'Inter';width:100%" onclick="addEditorCategory('${esc(compName)}', ${idx})">Add Category</button>
       </div>
@@ -577,6 +587,11 @@ function addEditorCompetition() {
           <label style="display:block;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Deadline (YYYY-MM-DD)</label>
           <input type="date" id="tempCatDate" style="width:100%;padding:8px;border:1px solid var(--hair);border-radius:4px;font-family:'Inter';font-size:13px">
         </div>
+        <div style="margin:8px 0">
+          <label style="display:block;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Description (optional)</label>
+          <textarea id="tempCatDesc" rows="3" placeholder="What the entry consists of, limits, eligibility window, team rules." style="width:100%;padding:8px;border:1px solid var(--hair);border-radius:4px;font-family:'Inter';font-size:13px;resize:vertical"></textarea>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Shown to students under the Category dropdown.</div>
+        </div>
         <button style="background:var(--green);color:#fff;border:none;padding:8px 12px;border-radius:4px;cursor:pointer;font-size:12px;font-family:'Inter';width:100%;margin-top:8px" onclick="addTempCategory('${esc(compName)}')">Add Category</button>
       </div>
       
@@ -596,10 +611,12 @@ function addEditorCompetition() {
 function addTempCategory(compName) {
   const catName = document.getElementById('tempCatName').value.trim();
   const catDate = document.getElementById('tempCatDate').value;
+  const catDesc = document.getElementById('tempCatDesc').value.trim();
   if (catName && catDate) {
-    window.tempCategories.push({ name: catName, date: catDate });
+    window.tempCategories.push({ name: catName, date: catDate, description: catDesc });
     document.getElementById('tempCatName').value = '';
     document.getElementById('tempCatDate').value = '';
+    document.getElementById('tempCatDesc').value = '';
     renderTempCategories();
   }
 }
@@ -619,6 +636,7 @@ function renderTempCategories() {
       <div>
         <div style="font-weight:600">${esc(cat.name)}</div>
         <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted)">${cat.date}</div>
+        ${cat.description ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;max-width:300px">${esc(cat.description)}</div>` : '<div style="font-size:11px;color:#C9701A;margin-top:4px">No description</div>'}
       </div>
     `;
     container.appendChild(item);
@@ -632,7 +650,10 @@ function saveTempCompetition(compName) {
   }
   editorState.competitions[compName] = {};
   window.tempCategories.forEach(cat => {
-    editorState.competitions[compName][cat.name] = cat.date;
+    editorState.competitions[compName][cat.name] = {
+      deadline: cat.date,
+      description: cat.description || ''
+    };
   });
   saveEditor();
   renderEditor();
@@ -656,11 +677,19 @@ function deleteEditorCompetition(name) {
   }
 }
 
+/* A stored category is either "YYYY-MM-DD" (older saves) or { deadline, description }. */
+function catEntry(value) {
+  if (typeof value === 'string') return { deadline: value, description: '' };
+  return { deadline: (value && value.deadline) || '', description: (value && value.description) || '' };
+}
+
 function addEditorCategory(compName, idx) {
   const catName = document.getElementById(`catName-${idx}`).value.trim();
   const catDate = document.getElementById(`catDate-${idx}`).value;
+  const descEl = document.getElementById(`catDesc-${idx}`);
+  const catDesc = descEl ? descEl.value.trim() : '';
   if (catName && catDate) {
-    editorState.competitions[compName][catName] = catDate;
+    editorState.competitions[compName][catName] = { deadline: catDate, description: catDesc };
     saveEditor();
     renderEditor();
   }
@@ -694,31 +723,45 @@ function deleteEditorCourse(idx) {
   }
 }
 
+/* JSON-escape a value so quotes, backslashes and newlines survive the paste. */
+function jsStr(s) {
+  return JSON.stringify(String(s == null ? '' : s));
+}
+
 function generateEditorOutput() {
+  const comps = Object.keys(editorState.competitions);
   let code = 'const CONFIG = {\n';
+  code += `  academicYear: ${jsStr(editorState.academicYear || '2026-2027')},\n\n`;
   code += '  competitions: {\n';
-  
-  Object.keys(editorState.competitions).forEach((compName, idx) => {
-    const isLast = idx === Object.keys(editorState.competitions).length - 1;
-    code += `    "${compName}": {\n`;
+
+  comps.forEach((compName, idx) => {
+    const isLast = idx === comps.length - 1;
     const comp = editorState.competitions[compName];
-    Object.keys(comp).forEach((catName, catIdx) => {
-      const isLastCat = catIdx === Object.keys(comp).length - 1;
-      code += `      "${catName}": "${comp[catName]}"${isLastCat ? '' : ','}\n`;
+    const cats = Object.keys(comp);
+    code += `    ${jsStr(compName)}: {\n`;
+    cats.forEach((catName, catIdx) => {
+      const isLastCat = catIdx === cats.length - 1;
+      const e = catEntry(comp[catName]);
+      code += `      ${jsStr(catName)}: {\n`;
+      code += `        deadline: ${jsStr(e.deadline)},\n`;
+      code += `        description: ${jsStr(e.description)}\n`;
+      code += `      }${isLastCat ? '' : ','}\n`;
     });
     code += `    }${isLast ? '' : ','}\n`;
   });
-  
-  code += '  },\n';
+
+  code += '  },\n\n';
   code += '  courses: [\n';
   editorState.courses.forEach((course, idx) => {
     const isLast = idx === editorState.courses.length - 1;
-    code += `    "${course}"${isLast ? '' : ','}\n`;
+    code += `    ${jsStr(course)}${isLast ? '' : ','}\n`;
   });
-  code += '  ],\n';
-  code += '  majors: ["Journalism", "Digital Storytelling", "Other"]\n';
+  code += '  ],\n\n';
+  code += '  majors: ["Journalism", "Digital Storytelling", "Other"],\n';
+  code += '  classifications: ["Freshman", "Sophomore", "Junior", "Senior"],\n';
+  code += '  statuses: ["Pending", "Submitted", "Winner", "Honorable Mention", "Rejected"]\n';
   code += '};\n';
-  
+
   document.getElementById('editorCodeOutput').textContent = code;
 }
 
