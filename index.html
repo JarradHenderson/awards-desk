@@ -353,6 +353,19 @@
         <div class="hint">Direct link to where the work was published.</div>
         <div class="hint">Create a new file with your name and upload files here: <a id="shadeUploadLink" href="https://app.shade.inc/publish/2f1062f6-3c78-47a7-9db1-0c868679beaf" target="_blank" rel="noreferrer noopener">Shade upload page</a></div>
       </div>
+
+      <div class="row">
+        <div class="field">
+          <label class="req" for="submittedBy">Submitted by</label>
+          <input type="text" id="submittedBy" name="submittedBy" placeholder="Your full name" required>
+          <div class="hint">Who is entering this submission.</div>
+        </div>
+        <div class="field">
+          <label for="timecode">Runtime or timestamp</label>
+          <input type="text" id="timecode" name="timecode" placeholder="4:52, or 12:30–22:30">
+          <div class="hint">Total length of the piece. If it sits inside a longer newscast or podcast, give the start and end times of the segment to be judged.</div>
+        </div>
+      </div>
     </section>
 
     <!-- Students -->
@@ -702,6 +715,8 @@ function collect() {
     datePublished: $("published").value,
     course: courseSel.value,
     url: $("url").value.trim(),
+    submittedBy: $("submittedBy").value.trim(),
+    timecode: $("timecode").value.trim(),
     status: "Pending",
     deadline: iso,
     daysUntilDue: iso ? daysUntil(iso) : null,
@@ -717,6 +732,8 @@ function buildMailto(entry) {
     "Deadline: " + (entry.deadline || "n/a") + "  (" + entry.daysUntilDue + " days)",
     "Published: " + entry.datePublished + "  " + entry.url,
     "Course/Outlet: " + entry.course,
+    "Submitted by: " + (entry.submittedBy || "n/a"),
+    ...(entry.timecode ? ["Runtime/timestamp: " + entry.timecode] : []),
     "",
     "STUDENTS:",
     ...entry.students.map(s =>

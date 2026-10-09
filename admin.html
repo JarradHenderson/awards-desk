@@ -143,6 +143,21 @@
   .d-msg{font-size:13px;margin-top:12px;min-height:18px}
   .d-msg.err{color:var(--rejected)}
   .d-msg.ok{color:var(--winner)}
+
+  .danger{
+    margin-top:34px;padding-top:18px;border-top:1px solid var(--hair);
+  }
+  .danger-head{
+    font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--rejected);margin-bottom:6px;
+  }
+  .danger-note{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:12px}
+  .danger-btn{background:none;border:1px solid var(--rejected);color:var(--rejected)}
+  .danger-btn:hover:not(:disabled){background:var(--rejected);color:#fff;opacity:1}
+  .danger-btn:disabled{opacity:.4;cursor:not-allowed}
+  .danger-confirm{display:none;margin-top:14px;padding:14px;background:#FDF1EF;border:1px solid var(--rejected);border-radius:6px}
+  .danger-confirm.open{display:block}
+  .danger-confirm input{width:100%;font-family:'Space Mono',monospace;letter-spacing:.08em}
 </style>
 </head>
 <body>
@@ -218,6 +233,8 @@
   <div class="d-field"><label>Primary classification</label><input type="text" id="dPClass"></div>
   <div class="d-field"><label>Majors (comma separated)</label><input type="text" id="dMajors"></div>
   <div class="d-field"><label>Students roster</label><textarea id="dStudents"></textarea></div>
+  <div class="d-field"><label>Submitted by</label><input type="text" id="dSubmittedBy"></div>
+  <div class="d-field"><label>Runtime / timestamp</label><input type="text" id="dTimecode"></div>
   <div class="d-field"><label>Submitted on</label><div class="d-readonly" id="dSubmitted">—</div></div>
 
   <div class="d-actions">
@@ -225,6 +242,21 @@
     <button class="btn ghost" id="dCancel">Cancel</button>
   </div>
   <div class="d-msg" id="dMsg"></div>
+
+  <div class="danger">
+    <div class="danger-head">Delete entry</div>
+    <p class="danger-note">Moves this entry to the Notion trash, where it can be restored for 30 days. It disappears from this dashboard straight away.</p>
+    <button class="btn danger-btn" id="dDelete">Delete this entry</button>
+
+    <div id="dConfirm" class="danger-confirm">
+      <p class="danger-note">Type <strong>DELETE</strong> to confirm.</p>
+      <input type="text" id="dConfirmInput" autocomplete="off" placeholder="DELETE">
+      <div class="d-actions">
+        <button class="btn danger-btn" id="dDeleteConfirm" disabled>Delete permanently from dashboard</button>
+        <button class="btn ghost" id="dDeleteCancel">Keep it</button>
+      </div>
+    </div>
+  </div>
 </aside>
 
 <script>
@@ -374,15 +406,47 @@ function openDrawer(id){
   $("dPClass").value = e.primaryClass || "";
   $("dMajors").value = (e.majors || []).join(", ");
   $("dStudents").value = e.students || "";
+  $("dSubmittedBy").value = e.submittedBy || "";
+  $("dTimecode").value = e.timecode || "";
   $("dSubmitted").textContent = e.submittedOn ? new Date(e.submittedOn).toLocaleString() : "—";
   $("dMsg").textContent = "";
+  resetDeleteConfirm();
   $("scrim").classList.add("open");
   $("drawer").classList.add("open");
 }
 function closeDrawer(){
   $("scrim").classList.remove("open");
   $("drawer").classList.remove("open");
+  resetDeleteConfirm();
   editingId = null;
+}
+
+/* ---------- delete ---------- */
+function resetDeleteConfirm(){
+  $("dConfirm").classList.remove("open");
+  $("dConfirmInput").value = "";
+  $("dDeleteConfirm").disabled = true;
+  $("dDelete").style.display = "";
+}
+
+async function deleteEntry(){
+  if(!editingId) return;
+  if($("dConfirmInput").value.trim().toUpperCase() !== "DELETE") return;
+  const msg = $("dMsg");
+  msg.className = "d-msg";
+  msg.textContent = "Deleting…";
+  $("dDeleteConfirm").disabled = true;
+  try{
+    await api({ action:"delete", id: editingId });
+    ALL = ALL.filter(x => x.id !== editingId);
+    buildFilters();
+    render();
+    closeDrawer();
+  }catch(err){
+    msg.className = "d-msg err";
+    msg.textContent = "Delete failed: " + err.message;
+    $("dDeleteConfirm").disabled = false;
+  }
 }
 
 async function saveEdit(){
@@ -400,7 +464,9 @@ async function saveEdit(){
     primaryName: $("dPName").value.trim(),
     primaryClass: $("dPClass").value.trim(),
     majors: $("dMajors").value.split(",").map(s=>s.trim()).filter(Boolean),
-    students: $("dStudents").value.trim()
+    students: $("dStudents").value.trim(),
+    submittedBy: $("dSubmittedBy").value.trim(),
+    timecode: $("dTimecode").value.trim()
   };
   const msg = $("dMsg");
   msg.className = "d-msg";
@@ -429,10 +495,10 @@ function exportCSV(){
   const rows = visibleRows();
   const cols = ["title","students","competition","category","status","course",
                 "academicYear","deadline","daysUntilDue","datePublished","url",
-                "primaryName","primaryClass","majors"];
+                "primaryName","primaryClass","majors","submittedBy","timecode"];
   const head = ["Project Title","Students","Competition","Category","Status","Course",
                 "Academic Year","Deadline","Days Until Due","Date Published","URL",
-                "Primary Name","Primary Classification","Majors"];
+                "Primary Name","Primary Classification","Majors","Submitted By","Runtime / Timestamp"];
   const escCSV = v => {
     if(Array.isArray(v)) v = v.join("; ");
     v = (v==null?"":String(v));
@@ -456,6 +522,16 @@ $("dClose").addEventListener("click", closeDrawer);
 $("dCancel").addEventListener("click", closeDrawer);
 $("scrim").addEventListener("click", closeDrawer);
 $("dSave").addEventListener("click", saveEdit);
+$("dDelete").addEventListener("click", () => {
+  $("dConfirm").classList.add("open");
+  $("dDelete").style.display = "none";
+  $("dConfirmInput").focus();
+});
+$("dDeleteCancel").addEventListener("click", resetDeleteConfirm);
+$("dConfirmInput").addEventListener("input", () => {
+  $("dDeleteConfirm").disabled = $("dConfirmInput").value.trim().toUpperCase() !== "DELETE";
+});
+$("dDeleteConfirm").addEventListener("click", deleteEntry);
 
 load();
 </script>
